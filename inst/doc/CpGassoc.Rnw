@@ -1,0 +1,881 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+% \VignetteDepends{nlme}
+% \VignetteIndexEntry{CpGassoc reference}
+% \VignetteKeywords{Methylation Analysis}
+% \VignettePackage{CpGassoc}
+
+\documentclass[a4paper]{article}
+
+\usepackage{Sweave}
+\usepackage{longtable}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\textit{#1}}}
+
+\SweaveOpts{keep.source=TRUE,debug=TRUE,engine=R}
+
+\begin{document}
+\fontsize{4mm}{5mm}\selectfont
+\begin{center}
+\Large CpGassoc\\
+\normalsize \today
+\end{center}
+
+\hypertarget{cpg.assoc}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+\label{section:cpg.assoc}
+cpg.assoc & & \itshape Association Analysis Between Methylation Beta Values and Phenotype of Interest\\
+\end{tabular}
+\line(1,0){400}\\
+
+
+\subsection*{\small Usage}
+cpg.assoc(beta.val, indep, covariates = NULL, data = NULL, logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, large.data = TRUE, fdr.method = "BH", logitperm = FALSE)
+
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+beta.val & & A vector, matrix, or data frame containing the beta values of interest (1 row per CpG site, 1 column per individual).\\\\
+
+indep & & A vector containing the variable to be tested for association. \Rfunction{cpg.assoc} will evaluate the association between the beta values (dependent variable) and indep (independent variable).\\\\
+
+covariates & & A data frame consisting of additional covariates to be included in the model. covariates can also be specified as a matrix if it takes the form of a model matrix with no intercept column, or can be specified as a vector if there is only one covariate of interest. Can also be a formula(e.g. \Rfunction{~cov1+cov2}).\\\\
+
+data & & an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model. If not found in data, the variables are taken from the environment from which cpg.assoc is called. \\\\
+
+logit.transform & & Logical. If \Rfunction{TRUE}, the logit transform of the beta values log(beta.val/(1-beta.val)) will be used. Any values equal to zero or one will be set to the next smallest or  next largest value respectively; values <0 or >1 will be set to NA. \\\\
+
+chip.id & & An optional vector containing chip or batch identifiers. If specified, \Robject{chip.id} will be included as a factor in the model.\\\\
+
+subset & & An optional logical vector specifying a subset of observations to be used in the fitting process. \\\\
+
+random & & Logical. If \Rfunction{TRUE}, \Robject{chip.id} will be included in the model as a random effect, and a random intercept model will be fitted. If \Rfunction{FALSE}, \Robject{chip.id} will be included in the model as an ordinary categorical covariate, for a much faster analysis.\\\\
+
+fdr.cutoff & & The desired FDR threshold. The default setting is .05. The set of CpG sites with FDR < \Robject{fdr.cutoff} will be labeled as significant.\\\\
+
+large.data & & Logical. Enables analyses of large datasets. When \Rfunction{large.data=TRUE}, \Rfunction{cpg.assoc} avoids memory problems by performing the analysis in chunks. \\\\
+
+fdr.method & & Character. Method used to calculate False Discovery Rate. Choices include any of the methods available in \Rfunction{p.adjust()} or "qvalue" for John Storey's qvalue method (requires that \Rpackage{qvalue} package is installed). The default method is "BH" for the Benjamini and Hochberg method.\\\\
+
+logitperm & & Logical. For internal use only.\\\\
+
+\end{longtable}
+
+\subsection*{\small Details}
+\noindent \Rfunction{cpg.assoc} is designed to test for association between an independent variable and methylation at a number of CpG sites, with the option to include additional covariates and factors. 
+\Rfunction{cpg.assoc} assesses significance with the Holm (step-down Bonferroni) and FDR methods. \\
+
+\noindent If \Rfunction{class(indep)='factor'}, \Rfunction{cpg.assoc} will perform an ANOVA test of the variable conditional on the covariates specified. Covariates, if entered, should be in the form of a data 
+frame, matrix, or vector. For example, \Rfunction{covariates=data.frame(weight,age,factor(city))}. The data frame can also be specified prior to calling \Rfunction{cpg.assoc}.  The covariates 
+should either be vectors or columns of a matrix or data.frame.\\
+
+\noindent \Rfunction{cpg.assoc} is also designed to deal with large data sets. Setting \Rfunction{large.data=TRUE} will make \Rfunction{cpg.assoc} split up the data to enable efficient analysis of large datasets.\\
+
+\subsection*{\small Value}
+\noindent \Rfunction{cpg.assoc} will return an object of class \Rclass{cpg}. The functions \Rfunction{summary} and \Rfunction{plot} can be called to get a summary of results and to create QQ plots.\\
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+results & & A data frame consisting of the t or F statistics and P-values for each CpG site, as well as indicators of Holm and FDR significance. CpG sites will be in the same order as the original input, but the sort() function can be used directly on the cpg.assoc object to sort CpG sites by p-value.\\\\
+
+results & & A data frame consisting of the t or F statistics and P-values for each CpG site, as well as indicators of Holm and FDR significance. CpG sites will be in the same order as the original input, but the \Rfunction{sort()} function can be used directly on the \Rfunction{cpg.assoc} object to sort CpG sites by p-value.\\\\
+
+Holm.sig & & A list of sites that met criteria for Holm significance. \\\\
+            
+FDR.sig & & A data.frame of the CpG sites that were significant by the FDR method specified.\\\\
+
+info & & A data frame consisting of the minimum P-value observed, the FDR method that was used, the phenotype of interest, the number of covariates in the model, the name of the matrix or data frame the methylation beta values were taken from, the FDR cutoff value and whether a mixed effects analysis was performed. \\\\
+
+indep & & The independent variable that was tested for association. \\\\ 
+
+covariates & & Data.frame or matrix of covariates, if specified (otherwise \Rfunction{NULL}). \\\\
+
+chip & & chip.id vector, if specified (otherwise \Rfunction{NULL}). \\\\
+
+coefficients & & A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the expected t-statistics. If indep is a categorical variable this object will be \Rfunction{NULL}. \\\\
+
+\end{longtable}
+
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
+\hyperlink{cpg.qc}{cpg.qc}
+
+
+\subsection*{\small Examples}
+<<>>=
+#Sample output from CpGassoc 
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+results<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
+results
+#Analysis with covariates. There are multiple ways to do this. One can define the
+#dataframe prior or do it in the function call or as a function such as ~Cov1+Cov2.
+#We will do it in the function call
+test<-cpg.assoc(samplecpg,samplepheno$weight,data.frame(samplepheno$Distance,samplepheno$Dose),large.data=FALSE)
+
+#Doing a mixed effects model. This does take more time, so we will do a subset of
+#the samplecpg
+randtest<-cpg.assoc(samplecpg[1:10,],samplepheno$weight,chip.id=samplepheno$chip,random=TRUE,large.data=FALSE)
+
+#summary function will work on items of class cpg.
+
+
+@
+
+
+\hypertarget{cpg.combine}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+
+cpg.combine & & \itshape Combine various objects of class \Rclass{cpg}\\
+
+\end{tabular}
+\line(1,0){400}\\
+
+
+\subsection*{\small Description}
+Takes a list containing objects of class \Rclass{cpg} and combines them into one cpg item. Assumes that there are no repeated CpG sites bewtween the various objects (i.e. analysis wasn't performed on the same sites twice).
+
+
+\subsection*{\small usage}
+cpg.combine(allvalues, fdr.method="BH",fdr.cutoff=.05)
+
+
+\subsection*{\small Arguments}
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+allvalues & & A list containing the \Rclass{cpg} objects that are desired to be consolidated.\\\\
+
+fdr.method & &   FDR method that user wants to use. For options see the \Rfunction{cpg.assoc} help page.\\\\
+
+fdr.cutoff & &   The desired FDR threshold. The default setting is .05. The set of CpG sites with FDR < fdr.cutoff will be labeled as significant.\\\\
+   
+\end{longtable}
+
+
+\subsection*{\small Value}
+\begin{longtable}{l p{1cm}   p{10cm} }
+indo.data & & An object of class \Rclass{cpg} that is the consolidated version of the objects of class cpg that were passed in.\\
+ \end{longtable}
+
+\subsection*{\small Authors}
+Barfield, R.;Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small Note}
+This is designed to be used by \Rfunction{cpg.assoc} when it does analysis on large data sets or by the user if they split up the analysis by chromosome or some other such partition.
+
+\subsection*{\small See Also}
+\hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg}
+
+
+\subsection*{\small Examples}
+<<>>=
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+test1<-cpg.assoc(samplecpg[1:100,],samplepheno$weight,large.data=FALSE)
+test2<-cpg.assoc(samplecpg[101:200,],samplepheno$weight,large.data=FALSE)
+overall<-cpg.combine(list(test1,test2))
+overall
+@
+
+
+\hypertarget{cpg.perm}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+\label{section:cpg.perm}
+
+cpg.perm & & \itshape Perform a Permutation Test of the Association Between Methylation and a Phenotype of Interest\\
+%\hline
+\end{tabular}
+\line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Description}
+\noindent \small Calls \Rfunction{cpg.assoc} to get the observed P-values from the study and then performs a user-specified number of permutations to calculate an emperical p-value.
+In addition to the same test statistics computed by \Rfunction{cpg.assoc}, \Rfunction{cpg.perm} will compute the permutation p-values for the observed p-value, the number of Holm significant sites, and the number of FDR significant sites.
+
+\subsection*{\small Usage}
+cpg.perm(beta.values, indep, covariates = NULL, nperm, data = NULL, seed = NULL, logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, fdr.method = "BH",large.data=TRUE)
+
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+beta.values & & A vector, matrix, or data frame containing the beta values of interest (1 row per CpG site, 1 column per individual). \\\\
+
+indep & & A vector containing the main variable of interest.  \Rfunction{cpg.assoc} will evaluate the association between indep and the beta values. \\\\
+
+covariates & & A data frame consisting of the covariates of interest. covariates can also be a matrix if it is a model matrix minus the intercept column. It can also be a vector if there is only one covariate of interest.  Can also be a formula(e.g. \texttt{~cov1+cov2}).\\\\
+
+nperm & & The number of permutations to be performed.\\\\
+
+data & & an optional data frame, list or environment (or object coercible by \texttt{as.data.frame} to a data frame) containing the variables in the model. If not found in data, the variables are taken from the environment from which \Rfunction{cpg.perm} is called.\\\\
+
+seed & & The required seed for random number generation. If not input, will use R's internal seed.\\\\
+
+logit.transform & & Logical. If \texttt{TRUE}, the logit transform of the beta values log(beta.val/(1-beta.val)) will be used. Any values equal to zero or one will be set to the next smallest or  next largest value respectively; values <0 or >1 will be set to NA.\\\\
+
+chip.id & & An optional vector containing the chip information. If specified, chip id will be included as a factor in the model.\\\\
+
+subset & & An optional logical vector specifying a subset of observations to be used in the fitting process.\\\\
+
+random & & Logical. If \texttt{TRUE}, the \texttt{chip.id} will be processed as a random effect, and a random intercept model will be fitted.\\\\
+
+fdr.cutoff & & The threshold at which to compare the FDR values. The default setting is .05. Any FDR values less than .05 will be considered significant.\\\\
+
+fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \texttt{p.adjust} or "qvalue" for John Storey's qvalue method (required to have \Rpackage{qvalue} package installed). The default method is "BH" for the Benjamini and Hochberg method. \\\\
+
+large.data & & Logical.  Enables analyses of large datasets.  When \texttt{large.data=TRUE}, \Rfunction{cpg.assoc} avoids memory problems by performing the analysis in chunks. \\\\
+
+\end{longtable}
+
+
+\subsection*{\small Value}
+\noindent The item returned will be of class \Rclass{cpg.perm}. It will contain all of the values of class \Rclass{cpg} \hyperlink{cpg.assoc}{cpg.assoc} and a few more:\\
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+permutation.matrix & & A matrix consisting of the minimum observed P-value, the number of Holm significant CpG sites, and the number of FDR significant sites for each permutation. \\\\
+
+perm.p.values & & A data frame consisting of the permutation P-values, and the number of permutations performed.\\\\
+
+perm.tstat & & If one hundred or more permutations were performed and indep is a continuous variable, consists of the quantile .025 and .975 of observed t-statistcs for each permutation, ordered from smallest to largest. perm.tstat is used by \Rfunction{plot.cpg.perm} to compute the confidence intervals for the QQ plot of t-statistics. Otherwise \texttt{NULL}.\\\\
+
+perm.pval & & If one hundred or more permutations were performed, consists of the observed p-values for each permutation, ordered from smallest to largest. perm.pval is usd by \Rfunction{plot.cpg.perm} to compute the confidence intervals for the QQ plot of the p-values. Otherwise \texttt{NULL}. \\\\
+                                                                                                                                                                                                                                                             
+\end{longtable}
+
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
+\hyperlink{cpg.qc}{cpg.qc}
+
+\subsection*{\small Examples}
+<<>>=
+##Loading the data
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+#Performing a permutation 10 times
+Testperm<-cpg.perm(samplecpg,samplepheno$weight,data.frame(samplepheno$Dose,samplepheno$Distance),
+                seed=2314,nperm=10,large.data=FALSE)
+Testperm
+#All the contents of CpGassoc are included in the output from Testperm
+#Using the output from CpGassoc in the example
+test<-cpg.assoc(samplecpg,samplepheno$weight,data.frame(samplepheno$Distance,samplepheno$Dose),large.data=FALSE)
+all.equal(Testperm$results,test$results)
+
+#summary function works on objects of class cpg.perm
+summary(Testperm)
+
+@
+
+
+\hypertarget{cpg.qc}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm}}
+
+cpg.qc & & \itshape Performs quality control on Illumina data.\\
+\end{tabular}\\
+\noindent \line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Description}
+\noindent \small \Rfunction{cpg.qc} is designed to perform quality control on Illumina data prior to analysis. 
+In addition to the matrix of beta values, this function requires as input matrices of Signal A, Signal B, and detection p-values.
+It will remove samples that have low intensity (mean signal intensity less than half of the overall median or 2000). 
+It can also set to NA datapoints with detection p-values exceeding a user-specified cutoff, and can remove samples or 
+sites that have a missing rate above a user-specified value. 
+Finally, users can opt to compute beta values as M/(U+M) or M/(U+M+100).
+
+\subsection*{\small Usage}
+cpg.qc(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE)
+
+\subsection*{\small Arguments}
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+beta.orig & & The original beta values matrix obtained from GenomeStudio.\\\\
+
+siga & & The unmethylated signals matrix obtained from GenomeStudio.\\\\
+
+sigb & & The methylated signals matrix obtained from GenomeStudio.\\\\
+
+pval & & A matrix of detection p-values obtained from GenomeStudio. pval should have the same dimension as the beta values and signals: one row for each site and one column for each individual.\\\\
+
+p.cutoff & & The user-specified cutoff for detection p-values (default=.001).\\\\
+
+cpg.miss & & Optional cutoff value. If specified, cpg.qc will remove cpg sites where the proportion of missing values exceeds this cutoff.\\\\
+
+sample.miss & & Optional cutoff value. If specified, cpg.qc will remove samples where the proportion of missing values exceeds this cutoff.\\\\
+
+constant100 & & Logical. If \texttt{TRUE}, the new beta values will be calculated as M/(U+M+100); if \texttt{FALSE} (default) they will be calculated as M/(U+M).\\\\
+
+\end{longtable}
+
+\subsection*{\small Details}
+\noindent It is important that all the matrices or data frames listed above (\texttt{pval}, \texttt{siga}, \texttt{sigb}, \texttt{beta.orig}) 
+are ordered similarly with respect to samples and CpG sites.
+
+\subsection*{\small Value}
+\noindent returns a new matrix of beta values that has been subjected to the specified quality control filters.  This matrix can be input directly into \Rfunction{cpg.assoc}.
+
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}
+
+\subsection*{\small Examples}
+<<>>=
+##See the examples in the CpGassoc tutorial.
+@
+
+                                                                                             
+
+\hypertarget{cpg.work}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+
+cpg.work & & \itshape Does the analysis between the CpG sites and phenotype of interest\\
+\end{tabular}
+\line(1,0){400}\\
+
+
+
+\subsection*{\small Description}
+Association Analysis Between Methylation Beta Values and Phenotype of Interest. This function contains the code that does the brunt of the work for \texttt{cpg.assoc} and \texttt{cpg.perm}.\\
+
+\subsection*{\small Usage}
+cpg.work(beta.values, indep, covariates = NULL, data = NULL, logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, callarge = FALSE, fdr.method = "BH", logitperm = FALSE,big.split=FALSE)
+
+\subsection*{\small Arguments}
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+beta.values & & A vector, matrix, or data frame containing the beta values of interest (1 row per CpG site, 1 column per individual).\\\\
+
+indep & & A vector containing the main variable of interest.  \Rfunction{cpg.work} will evaluate the association between indep and the beta values. \\\\
+
+covariates & & A data frame consisting of the covariates of interest. covariates can also be a matrix if it is a model matrix minus the intercept column. It can also be a vector if there is only one covariate of interest. Can also be a formula (e.g. \texttt{~cov1+cov2}).\\\\
+
+data & & an optional data frame, list or environment (or object coercible by \Rfunction{as.data.frame} to a data frame) containing the variables in the model. If not found in data, the variables are taken from the environment from which \texttt{cpg.work} is called.\\\\
+
+logit.transform & & Logical. If \texttt{TRUE}, the logit transform of the beta values log(beta.val/(1-beta.val)) will be used. Any values equal to zero or one will be set to the next smallest or  next largest value respectively; values <0 or >1 will be set to NA.\\\\
+
+chip.id & & An optional vector containing chip or batch identities. If specified, chip id will be included as a factor in the model.\\\\
+
+subset & & an optional logical vector specifying a subset of observations to be used in the fitting process.\\\\
+
+random & & Logical. If \texttt{TRUE}, the \texttt{chip.id} will be included in the model as a random effect, and a random intercept model will be fitted. If \texttt{FALSE}, \texttt{chip.id} will be included in the model as an ordinary categorical covariate, for a much faster analysis.\\\\
+
+fdr.cutoff & & The threshold at which to compare the FDR values. The default setting is .05. Any FDR values less than .05 will be considered significant.\\\\
+
+callarge & & Logical. Used by \Rfunction{cpg.assoc} when it calls \Rfunction{cpg.work}. If \texttt{TRUE} it means that beta.values is actually split up from a larger data set and that \Rfunction{memory.limit} may be a problem. This tells \Rfunction{cpg.work} to perform more \Rfunction{rm()} and \Rfunction{gc()} to clear up space.\\\\
+
+fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \Rfunction{p.adjust} or \Rpackage{qvalue} for John Storey's qvalue method (required to have \Rpackage{qvalue} package installed). The default method is "BH" for the Benjamini and Hochberg method.\\\\
+
+logitperm & & Passes from \Rfunction{cpg.perm} when permutation test is performed. Stops from future checks involving the logistic transformation.\\\\
+
+big.split & & Passes from \Rfunction{cpg.assoc}. Internal flag to inform \Rfunction{cpg.work} that the large data did not need to be split up.\\\\
+
+\end{longtable}
+
+
+\subsection*{\small Details}
+\noindent \Rfunction{cpg.work} does the analysis between the methylation and the phenotype of interest. It is called by \Rfunction{cpg.assoc} to do the brunt of the work. It can be called itself with the same input as \Rfunction{cpg.assoc}, it just cannot handle large data sets.
+
+\subsection* {\small Value}
+\noindent \Rfunction{cpg.work} will return an object of class \Rclass{cpg}.\\
+The functions summary and plot can be called to get a summary of results and to create QQ plots. The output is in the same order as the original input. To sort it by p-value, use the \Rfunction{sort} function.\\
+
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+  
+results & & A data frame consisting of the statistics and P-values for each CpG site. Also has the adjusted p-value based on the fdr.method and whether the site was Holm significant.\\\\
+
+Holm.sig & & A list of sites that met criteria for Holm significance.\\\\
+
+FDR.sig & & A data.frame of the sites that were FDR significant by the fdr method. \\\\
+
+info & & A data frame consisting of the minimum P-value observed, the fdr method used, what the phenotype of interest was, and the number of covariates in the model.\\\\
+
+indep & & The main phenotype of interest.\\\\
+
+covariates & & If covariates was non \Rfunction{NULL}, the covariates will be included.Otherwise will be \Rfunction{NULL}.\\\\
+
+chip & & If chip.id was non \Rfunction{NULL}, the chip will be included. Otherwise will be \Rfunction{NULL}. \\\\
+
+coefficients & & A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the estimated t-statistics. If indep is a categorical variable this object will be \texttt{NULL}.\\\\
+
+\end{longtable}
+
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
+\hyperlink{cpg.qc}{cpg.qc}
+
+\subsection*{\small Examples}
+<<>>=
+##See the examples listed in cpg.assoc for ways in which to use cpg.work.
+##Just change the cpg.assoc to cpg.work.
+@
+
+
+\hypertarget{design}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+design & & \itshape Create full and reduced design matrices for the cpg.assoc function.\\
+\end{tabular}
+\\\line(1,0){400}\\
+
+
+\subsection*{\small Description}
+Designed to be used by \texttt{cpg.assoc} and \texttt{cpg.perm}. Creates a full and reduced design matrices.
+
+\subsection*{\small Usage}
+design(covariates, indep, chip.id, random)
+
+
+\subsection*{\small Arguments}
+ \begin{longtable}{l p{1cm}   p{10cm} }
+
+covariates & & A data frame consisting of the covariates of interest. covariates can also be a matrix if it is a model matrix minus the intercept column. It can also be a vector if there is only one covariate of interest.If no covariates must be specified as \texttt{NULL}.\\\\
+
+indep & & A vector containing the main variable of interest.  \texttt{cpg.assoc} will evaluate the association between indep and the beta values.\\\\
+
+chip.id & & An optional vector containing chip or batch identities. If specified, \texttt{chip.id} will be included as a factor in the model.\\\\
+
+random & & Is the model going to be a mixed effects. If so, \texttt{chip.id} will not be included in the design matrices.\\\\
+
+\end{longtable}
+
+
+\subsection*{\small Value}
+Returns a list containing the full and reduced design matrices.\\
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+full & & The full design matrix\\\\
+reduced & & The reduced design matrix\\\\
+\end{longtable}
+
+
+\subsection*{\small Author}
+Barfield, R.; Kilaru,V.; Conneely, K.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small Note}
+The design function  is designed to be used exclusively by the cpg.assoc and cpg.perm functions.
+
+\subsection*{\small See Also}
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{class.cpg}{plot.cpg}, \hyperlink{cpg.work}{cpg.work},
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg}
+
+
+\subsection*{\small examples}
+<<>>=
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+#Example where there are covariates:
+covar<-data.frame(samplepheno$weight,samplepheno$Distance)
+test<-design(covar,samplepheno$SBP,samplepheno$chip,FALSE)
+dim(test$full)
+dim(test$reduced)
+test$reduced[1:5,1:5]
+test$full[1:5,1:5]
+#When no covariates or chip.id:
+test2<-design(NULL,samplepheno$SBP,NULL,FALSE)
+dim(test2$full)
+dim(test2$reduced)
+@
+
+
+\hypertarget{manhattan}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+
+manhattan & & \itshape Create a manhattan plot\\
+
+\end{tabular}
+\line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Description}
+This function will produce a manhattan plot for the observed P-values from a object of class \Rclass{cpg} or \Rclass{cpg.perm}.
+
+\subsection*{\small Usage}
+manhattan(x, cpgname, chr, pos, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, eps.size = c(15, 5), main.title = NULL, cpg.labels = NULL, chr.list = NULL, color.list = NULL, ...)
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+x & & Object of class \Rclass{cpg} or \Rclass{cpg.perm}.\\\\
+
+cpgname & & A vector consisting of the labels for each CpG site.\\\\
+
+chr & & A vector consisting of the chromosome number for each CpG site.\\\\
+
+pos & & The map position of each CpG site within its chromosome.\\\\
+
+save.plot & & Name of the file for the plot to be saved to. If not specified, plot will not be saved. \\\\
+
+file.type & & Type of file to be saved. Can either be \texttt{"pdf"} or \texttt{"eps"}. Selecting \texttt{file.type="eps"} will result in publication quality editable postscript files that can be opened by Adobe Illustrator or Photoshop.\\\\
+
+popup.pdf & & \texttt{TRUE} or \texttt{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a cluster-like environment, best to leave \texttt{FALSE}.\\\\
+
+eps.size & & Vector indicating the size of .eps file (if creating one). Corresponds to horrizontal and height.\\\\
+
+main.title & & Main title to be put on the graph. If \texttt{NULL} one based on the analysis will be used.\\\\
+
+cpg.labels & & A character scalar of either \texttt{"FDR"} or \texttt{"HOLM"} which will label the significant sites on the manhattan plot.\\\\
+
+chr.list & & A vector listing the chromosomes to be plotted (all available chromosomes are plotted by default). The X and Y chromosomes can be denoted by 23 and 24\\\\
+
+color.list & & A vector of custom colors to be used for each chromosomes in the manhattan plot.\\\\
+
+\dots & & Arguments to be passed to methods, such as graphical parameters.\\\\
+
+\end{longtable}
+
+
+
+\subsection*{\small Authors}
+Barfield, R.;Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small Note}
+\Robject{cpgname}, \Robject{chr}, and \Robject{pos} must be sorted in the same order, so that the first cpgname[1] corresponds to chr[1] and pos[1], and so on. 
+
+\subsection*{\small See Also}
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{class.cpg}{plot.cpg}, \hyperlink{cpg.work}{cpg.work},
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{design}{design},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg}
+
+
+\subsection*{\small Examples}
+\begin{figure}
+\centering
+<<manhattan, fig=TRUE>>=
+#Doing a Manhattan plot. First load the data:
+
+#Doing a Manhattan plot. First load the data:
+library(CpGassoc)
+data(samplecpg,samplepheno,annotation,package="CpGassoc")
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+examplemanhat<-cpg.assoc(samplecpg,samplepheno$Disease,large.data=FALSE)
+
+manhattan(examplemanhat,annotation$TargetID,annotation$CHR,annotation$MAPINFO)
+
+@
+\end{figure}
+
+
+
+\hypertarget{class.cpg}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+\label{section:Class cpg}
+Object of class cpg & & \itshape Methods for object of class\\
+\end{tabular}
+\line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Usage}
+
+plot.cpg(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), \dots)\\
+
+\noindent summary.cpg(object,\dots)\\
+
+\noindent print.cpg(x,\dots)\\
+
+\noindent sort.cpg(x,decreasing,\dots)\\
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+x & & Output of class \Rclass{cpg} from cpg.assoc or cpg.work.\\\\
+
+save.plot & & Name of the file for the plot to be saved to. If not specified, plot will not be saved.\\\\
+
+file.type & & Type of file to be saved. Can either be \texttt{"pdf"} or \texttt{"eps"}. Selecting \texttt{file.type="eps"} will result in publication quality editable postscript files that can be opened by Adobe Illustrator or Photoshop.\\\\
+
+popup.pdf & & \texttt{TRUE} or \texttt{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a cluster-like environment, best to leave \texttt{FALSE}.\\\\
+
+tplot & & Logical. If \texttt{TRUE}, ordered t-statistics will be plotted against their expected quanties. If \texttt{FALSE} (default), -log(p) will be plotted. If indep is a class variable this option will be ignored.\\\\
+
+classic & & Logical. If \texttt{TRUE}, a classic qq-plot will be generated, with all p-values plotted against predicted values (including significant). If \texttt{FALSE} Holm-significant CpG sites will not be used to compute expected quantiles and will be plotted separately.\\\\
+
+main.title & & Main title to be put on the graph. If \texttt{NULL} one based on the analysis will be used.\\\\
+
+eps.size & & Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the \texttt{postscript} function. \\\\
+
+object & & Output of class \Rclass{cpg} from \texttt{cpg.assoc} or \texttt{cpg.work}. \\\\
+
+decreasing & & Logical. Should the sort be increasing or decreasing? Not available for partial sorting.\\\\
+
+\dots & & Arguments to be passed to methods, such as graphical parameters.\\\\
+
+\end{longtable}
+
+
+\subsection*{\small Description}
+\noindent Methods and extra functions for class \Rclass{cpg}. \\ 
+
+\noindent \texttt{plot.cpg} creates a QQ plot based on the association p-values or t-statistics from the function \texttt{cpg.assoc}. \\
+
+\subsection*{\small Value}
+
+\noindent \texttt{sort.cpg} returns an item of class \Rclass{cpg} that is sorted by p-value.\\
+
+\noindent \texttt{summary.cpg} creates a qq-plot based on the data, and scatterplots or boxplots for the top sites. \\
+
+\subsection*{\small Authurs}
+
+Barfield, R.; Kilaru,V.; Conneely, K.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small Note}
+\noindent Plots with empirical confidence intervals based on permutation tests can be obtained from \texttt{cpg.perm}.\\
+See \hyperlink{perm.class}{plot.cpg.perm} for more info \\
+
+\subsection*{\small See Also}
+
+\hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{cpg.assoc}{cpg.assoc}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm},\hyperlink{cpg.qc}{cpg.qc}
+
+\subsection*{\small Examples}
+\begin{figure}
+\centering
+<<QQ_plot, fig=TRUE>>=
+##Using the results from the example given in cpg.assoc.
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+##QQ Plot:
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+test<-cpg.assoc(samplecpg,samplepheno$weight,data.frame(samplepheno$Distance,samplepheno$Dose),large.data=FALSE)
+plot(test)
+##t-statistic plot:
+plot(test,tplot=TRUE)
+
+##Now an example of sort
+head(sort(test)$results)
+
+##Summary
+summary(test)
+@
+\end{figure}
+
+
+
+
+
+
+\hypertarget{perm.class}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+\label{section:Class cpg.perm}
+
+Object of class cpg.perm & & \itshape Methods for object of class \Rclass{cpg.perm}\\
+
+\end{tabular}
+\line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Usage}
+
+plot.cpg.perm(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, ...)
+
+\noindent summary.cpg.perm(object,\dots)
+
+\noindent print.cpg.perm(x,\dots)
+
+\noindent sort.cpg.perm(x,decreasing,\dots)
+
+\subsection*{\small Description}
+Methods and extra functions for class \Rclass{cpg.perm}.
+\texttt{plot.cpg.perm} creates a QQ plot based on the association p-values or t-statistics from the function \texttt{cpg.perm}.
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+x & & Output from \texttt{cpg.perm}. Of class \Rclass{cpg.perm}.\\\\
+
+save.plot & & Name of the file for the plot to be saved to. If not specified, plot will not be saved.\\\\
+
+file.type & & Type of file to be saved. Can either be \texttt{"pdf"} or \texttt{"eps"}. Selecting \texttt{file.type="eps"} will result in publication quality editable postscript files that can be opened by Adobe Illustrator or Photoshop. \\\\
+
+popup.pdf & & \texttt{TRUE} or \texttt{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a cluster-like environment, best to leave \texttt{FALSE}.\\\\
+
+main.title & & Main title to be put on the graph. If \texttt{NULL} one based on the analysis will be used\\\\
+
+eps.size & & Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the \texttt{postscript} function. \\\\
+
+tplot & & Logical. If \texttt{TRUE}, ordered t-statistics will be plotted against their expected quanties. If \texttt{FALSE} (default), -log(p) will be plotted. If indep is a class variable this option will be ignored.\\\\
+
+perm.ci & & Logical. If \texttt{TRUE}, the confidence intervals computed will be from the permutated values, otherwise will be based on the theoretical values.\\\\
+
+classic & & Logical. If \texttt{TRUE}, a classic qq-plot will be generated, with all p-values plotted against predicted values (including significant). If \texttt{FALSE} Holm-significant CpG sites will not be used to compute expected quantiles and will be plotted separately.\\\\
+
+object & & Output of class \Rclass{cpg.perm} from \Rclass{cpg.perm}.\\\\
+
+decreasing & & Logical. Should the sort be increasing or decreasing? Not available for partial sorting.\\\\
+
+\dots & & Arguments to be passed to methods, such as graphical parameters.\\\\
+
+\end{longtable}
+
+\subsection*{\small Authors}
+Barfield, R.; Kilaru,V.; Conneely, K.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small Note}
+Empirical confidence intervals will be computed only if there are a hundred or more permutations. Otherwise the theoretical confidence intervals will be plotted.
+
+\subsection*{\small See Also}
+
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{class.cpg}{plot.cpg}, \hyperlink{cpg.work}{cpg.work},
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{design}{design},
+ \hyperlink{manhattan}{manhattan}, \hyperlink{class.cpg}{sort.cpg}
+
+\subsection*{\small Examples}
+\begin{figure}
+\centering
+<<Perm_qqplot, fig=TRUE>>=
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+##We will do the analysis on a subset to save time
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+#The qq plot:
+Testperm<-cpg.perm(samplecpg,samplepheno$weight,data.frame(samplepheno$Dose,samplepheno$Distance),
+                seed=2314,nperm=10,large.data=FALSE)
+plot(Testperm)
+#The t-statistic plot from cpg.perm has confidence intervals since we were allowed to perform permutations on the T-values.
+plot(Testperm,tplot=TRUE)
+#If there was 100 or more permutations, there would be emperical confidence intervals.
+
+###Now for Sort
+head(sort(Testperm)$results)
+head(Testperm$results)
+@
+\end{figure}
+
+
+\hypertarget{scatterplot}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm} }
+
+scatterplot & & \itshape Plot beta values of individual CpG sites against the independent variable.\\
+
+\end{tabular}
+\line(1,0){400}\\
+
+\subsection*{\small Usage}
+scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,main.title=NULL, ...)
+
+
+
+\subsection*{\small Arguments}
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+x & & Object of class \Rclass{cpg} or \Rclass{cpg.perm}.\\\\
+
+cpg.rank & & A vector listing the rank of sites to be plotted. The rank is based on the ordered p-values.\\\\
+
+cpg.name & & A character vector containing the names of CpG sites to be plotted against the phenotype of interest. This option is ignored if \Robject{cpg.rank} is specified.\\\\
+
+save.plot & & Prefix of the filename for the plot(s) to be saved to. If specified, plot filenames will be created by appending this prefix to either cpg.rank or cpg.name.  If not specified, plot will not be saved.\\\\
+
+file.type & & Type of file to be saved. Can either be \texttt{"pdf"} or \texttt{"eps"}. Selecting \texttt{file.type="eps"} will result in publication quality editable postscript files that can be opened by Adobe Illustrator or Photoshop.\\\\
+
+eps.size & & Vector indicating the size of .eps file (if creating one). Correponds to horrizontal and height.\\\\
+
+popup.pdf & & \texttt{TRUE} or \texttt{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a cluster-like environment, best to leave \texttt{FALSE}.\\\\
+
+beta.values & & If the object has been renamed (i.e. \texttt{x$info$betainfo} is no longer in \texttt{ls(.GlobalEnv)}) then specify the new object here.\\\\
+
+main.title & & Main title to be put on the graph. If \texttt{NULL} one based on the analysis will be used\\\\
+
+\dots & & Arguments to be passed to methods, such as graphical parameters.\\\\
+
+\end{longtable}
+
+\subsection*{\small Details}
+An unlimited number of CpG sites can be selected for plotting by specifying either \Robject{cpg.rank} or \Robject{cpg.name}, as shown in the Examples below.  Note that only one of these options is needed; if  both are entered, \Robject{cpg.rank} will be used.\\
+
+
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{manhattan}{manhattan}, \hyperlink{cpg.work}{cpg.work},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{design}{design},
+\hyperlink{class.cpg}{plot.cpg}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg}
+
+\subsection*{\small Examples}
+\begin{figure}
+\centering
+<<Scatterplot, echo=TRUE>>=
+#Load the data:
+data(samplecpg,samplepheno,package="CpGassoc")
+library(CpGassoc)
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+##This will involve partitioning up the data and performing more gc() to clear up space
+test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
+##Using rank, will plot the top three sites in order of significance:
+scatterplot(test,c(1:3))
+##Using name, specify three sites:
+scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"))
+
+##Plotting something that is categorical in nature:
+test2<-cpg.assoc(samplecpg,factor(samplepheno$Disease),large.data=FALSE)
+scatterplot(test2,c(2))
+@
+\end{figure}
+
+
+
+
+\end{document}
+
+
+
