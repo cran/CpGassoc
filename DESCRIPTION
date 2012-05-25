@@ -1,8 +1,8 @@
 Package: CpGassoc
 Type: Package
 Title: Association between Methylation and a phenotype of interest
-Version: 1.00
-Date: 2012-05-10
+Version: 1.1
+Date: 2012-05-25
 Author: Barfield, R., Conneely, K., Kilaru,V
 Maintainer: R Barfield <richard.thomas.barfield@emory.edu>
 Description: CpGassoc is designed to test for association between
@@ -18,6 +18,6 @@ Description: CpGassoc is designed to test for association between
 Depends: R (>= 2.10), nlme
 Suggests: qvalue
 License: GPL (>= 2)
-Packaged: 2012-05-21 19:11:49 UTC; rbarfield
+Packaged: 2012-05-25 15:28:04 UTC; rbarfield
 Repository: CRAN
-Date/Publication: 2012-05-22 05:54:48
+Date/Publication: 2012-05-26 14:02:14

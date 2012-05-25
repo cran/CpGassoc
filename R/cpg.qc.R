@@ -1,10 +1,6 @@
 cpg.qc <-
 function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE) {
 
-    k=list(order(colnames(siga)),order(colnames(sigb)))
-    siga=siga[,k[[1]]]
-    sigb=sigb[,k[[2]]]
-
 #Get measures of mean intensity, use this to flag low-signal individuals for removal
     avg_sig=colMeans(siga+sigb,na.rm=TRUE)
     experimentwide_median_sig=median(avg_sig)
