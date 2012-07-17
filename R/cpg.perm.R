@@ -2,10 +2,9 @@ cpg.perm <-
 function(beta.values,indep,covariates=NULL,nperm,data=NULL,seed=NULL,
      logit.transform=FALSE,chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,fdr.method="BH",large.data=TRUE) {
 
-betainfo<-deparse(substitute(beta.values))
+name.holder<-list(deparse(substitute(beta.values)),deparse(substitute(chip.id)),cpg.everything(deparse(substitute(indep))))
 
-beta.col<-ncol(beta.values )
-if(is.null(beta.col)) {beta.values<-as.matrix(beta.values)}
+if(is.null(ncol(beta.values))) {beta.values<-as.matrix(beta.values)}
 beta.row<-nrow(beta.values)
 beta.col<-ncol(beta.values)
 if(class(covariates)=="formula") {
@@ -37,13 +36,10 @@ if(is.matrix(covariates)| length(covariates)==length(indep) ) {
       covariates<-data.frame(covariates)
       }}
 levin<-is.factor(indep)
-R<-numeric(length(indep))
 Problems<-which(beta.values<0 |beta.values >1)
 
-Phenotype<-deparse(substitute(indep))
-Phenotype<-cpg.everything(Phenotype)
 ob.data<-cpg.assoc(beta.values,indep,covariates,data,logit.transform,chip.id,subset,random,fdr.cutoff,fdr.method=fdr.method,large.data=large.data)
-ob.data$info$Phenotype<-Phenotype
+ob.data$info$Phenotype<-name.holder[[3]]
 Min.P.Observed<-ob.data$info[1,1]
 
 
@@ -66,7 +62,7 @@ if(logit.transform) {
     onevalues<-which(beta.values==1)
     zerovalues<-which(beta.values==0)
     if(length(onevalues)>0 | length(zerovalues)>0) {
-        if(length(onevalues)>0) {
+      if(length(onevalues)>0) {
          beta.values[onevalues]<-NA
          beta.values[onevalues]<-max(beta.values,na.rm=T)
             }
@@ -80,7 +76,7 @@ if(logit.transform) {
           }
      
 if(!is.null(subset)){
-  if(random) {
+  if(!is.null(chip.id)) {
     chip.id<-chip.id[subset]
         }
   beta.values<-beta.values[,subset]
@@ -88,23 +84,22 @@ if(!is.null(subset)){
   if(!is.null(covariates)) {
       covariates<-covariates[subset,]
       }
+  subset=NULL
           }
 
 
 
- fdr.value<- matrix(nrow = nperm)
 
-Permutation <- matrix(nrow = nperm,ncol = 2)
+
+Permutation <- matrix(nrow = nperm,ncol = 3)
 compleval<-design(covariates,indep,chip.id,random)[[3]]
-
+gc.Permutation<-matrix(nrow=nperm,ncol=3)
 indep<-indep[compleval]
 covariates<-data.frame(covariates[compleval,])
 if(ncol(covariates)==0 & nrow(covariates)==0) {covariates=NULL}
 beta.values<-beta.values[,compleval]
 if(is.null(dim(beta.values))) {beta.values<-as.matrix(beta.values)}
 chip.id<-chip.id[compleval]
-n=length(compleval)
-
 
 for(i in 1:nperm) {
   if (!is.null(seed)) {
@@ -112,23 +107,35 @@ for(i in 1:nperm) {
         }
   Perm.var <- sample(indep);
   
-  DR <- matrix(NA,beta.row,1)
   answers<-cpg.assoc(beta.values,Perm.var,covariates,data,logit.transform=FALSE
                 ,chip.id,subset,random,fdr.cutoff,fdr.method=fdr.method,logitperm=TRUE,large.data=large.data)
-  DR[,1]<-answers$results$P.value
     if(random) {
-    problems<-sum(is.na(DR[,1]))
-    if (problems>0){
-     cpg.everything(complex(1),first=FALSE,logit.transform,problems)
-                    }
-    }
+      problems<-sum(is.na(answers$results$P.value))
+      if (problems>0){
+        cpg.everything(complex(1),first=FALSE,logit.transform,problems)
+                   }
+               }
   if(nperm>=100 ) {
     perm.pval[,i]<-answers$results$P.value
     if(!levin) {perm.tstat[,i]<-answers$results$T.statistic}
       }
-  fdr.value[i]<-nrow(answers$FDR.sig)
-  Permutation[i,1:2] <- c(answers$info$Min.P.Observed,nrow(answers$Holm.sig))
-   rm(answers)
+  Permutation[i,1:3] <- c(answers$info$Min.P.Observed,nrow(answers$Holm.sig),nrow(answers$FDR.sig))
+
+  if (fdr.method=="qvalue") {
+      fdr.adj<-try(qvalue(answers$results$gc.p.value),silent=TRUE)
+        if(class(fdr.adj)=="try-error") {
+          fdr.adj <- try(qvalue(answers$results$gc.p.value, pi0.method = "bootstrap"),silent=TRUE)
+          if(class(fdr.adj)=="try-error") {
+         fdr.method="BH"
+        }}}
+  if(fdr.method!="qvalue") {
+          fdr.adj<-p.adjust(answers$results$gc.p.value,fdr.method)
+          }
+  gc.Permutation[i,1:3]<-c(min(answers$results$gc.p.value,na.rm=TRUE),
+                            sum(p.adjust(answers$results$gc.p.value,"holm")<.05),
+                            sum(fdr.adj<.05))
+
+  rm(answers)
   gc()
            }
       
@@ -136,28 +143,25 @@ Permutation<-data.frame(Permutation)
 
 p.value.p <- sum(Permutation[,1]<=Min.P.Observed)/nperm
 p.value.holm <- sum(Permutation[,2]>=nrow(ob.data$Holm.sig))/nperm
-Permutation<-cbind(Permutation,fdr.value)
-      p.value.FDR <- sum(Permutation[,3]>=nrow(ob.data$FDR.sig))/nperm 
+p.value.FDR <- sum(Permutation[,3]>=nrow(ob.data$FDR.sig))/nperm 
 
 if(is.null(seed)) {seed<-"NULL"}
 p.value.matrix <- data.frame(p.value.p,p.value.holm,p.value.FDR,nperm,seed)
 names(Permutation)<-cpg.everything(fdr,perm=TRUE)
-perm.data<-list(permutation.matrix=Permutation,perm.p.values=p.value.matrix)
+colnames(gc.Permutation)<-names(Permutation)
+perm.data<-list(permutation.matrix=Permutation,perm.p.values=p.value.matrix,gc.permutation.matrix=gc.Permutation)
 perm.data<-append(perm.data,ob.data)
-names(perm.data)<-c("permutation.matrix","perm.p.values",names(ob.data))
+names(perm.data)<-c("permutation.matrix","perm.p.values","gc.permutation.matrix",names(ob.data))
 if(nperm>=100) {
-  perm.pval<-data.frame(perm.pval)
   perm.pval<-apply(perm.pval,2,sort)
   perm.pval<- -log(perm.pval,base=10)
-  perm.pval<-t(apply(perm.pval,1,quantile,probs=c(.025,.975)))
-  perm.data$perm.pval<-perm.pval
+  perm.data$perm.pval<-t(apply(perm.pval,1,quantile,probs=c(.025,.975)))
   if(!levin ) {
-  perm.tstat<-data.frame(perm.tstat)
   perm.tstat<-apply(perm.tstat,2,sort)
   perm.data$perm.tstat<-t(apply(perm.tstat,1,quantile,probs=c(.025,.975)))
     }}
-perm.data$info$betainfo<-betainfo
-rm(Permutation,ob.data,DR,p.value.matrix)
+perm.data$info$betainfo<-name.holder[[1]]
+rm(Permutation,ob.data,p.value.matrix)
 gc()
 if(!is.null(data)) {
   detach(data)

@@ -19,10 +19,10 @@ There is a tutorial for CpGassoc available at the website <genetics.emory.edu/co
 Package: CpGassoc
 Type: Package
 Title: Association between Methylation and a phenotype of interest
-Version: 1.1
-Date: 2012-05-25
+Version: 1.3
+Date: 2012-07-17
 Author: Barfield, R., Conneely, K., Kilaru,V
-Maintainer: R Barfield <richard.thomas.barfield@emory.edu>
+Maintainer: R Barfield <rbarfield01@fas.harvard.edu>
 Description: CpGassoc is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, adjusting for any relevant covariates. The package can perform standard analyses of large datasets very quickly with no need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. CpGassoc also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, and scatterplots for individual CpG sites.
 Depends:nlme
 Suggests:qvalue
@@ -45,7 +45,7 @@ For more information see \code{\link{plot.cpg.perm}}. For more information on ho
 }
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 
@@ -70,7 +70,7 @@ results<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 results
 
 ##Using cpg.perm:
-Testperm<-cpg.perm(samplecpg,samplepheno$weight,data.frame(samplepheno$Dose,samplepheno$Distance),
+Testperm<-cpg.perm(samplecpg[1:200,],samplepheno$weight,data.frame(samplepheno$Dose),
                 seed=2314,nperm=10,large.data=FALSE)
 Testperm
 

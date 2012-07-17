@@ -87,15 +87,14 @@ If chip.id was non \code{NULL}, the chip will be included. Otherwise will be \co
   }
 
   \item{coefficients}{
-A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. 
-The degrees of freedom is used in \code{\link{plot.cpg}} to compute the estimated t-statistics.\cr
-If indep is a categorical variable this object will be \code{NULL}.
-  }
+A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. 
+The degrees of freedom is used in \code{\link{plot.cpg}} to compute the genomic inflation factors.\cr
+ }
 }
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 
@@ -111,6 +110,7 @@ Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
 \code{\link{sort.cpg.perm}}
 \code{\link{sort.cpg}}
 \code{\link{cpg.qc}}
+\code{\link{cpg.GC}}
 }
 \examples{
 ##See the examples listed in cpg.assoc for ways in which to use cpg.work.

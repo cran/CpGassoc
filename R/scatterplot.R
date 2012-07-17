@@ -90,11 +90,11 @@ function(x,cpg.rank=NULL,cpg.name=NULL,save.plot=NULL,file.type="pdf",eps.size=c
           plot(betasval[,place[i]]~x$indep,xlab=nam.ind,ylab=place[i],main=titleinfo,
               sub=paste("P-value = ",format(x$results$P.value[holder[i]],digits=3)),...) 
           if(!x$info$logittran) {
-          abline(a=x$coefficients[place[i],2],b=x$coefficients[place[i],3],col="red")
+          abline(a=x$coefficients[place[i],3],b=x$coefficients[place[i],4],col="red")
               }
           else {
              if(is.factor(place)) {place<-as.character(place)}
-             explogitbeta<-x$coefficients[place[i],2]+x$coefficients[place[i],3]*sampvalues
+             explogitbeta<-x$coefficients[place[i],3]+x$coefficients[place[i],4]*sampvalues
              testbeta<-exp(explogitbeta)/(1+exp(explogitbeta))
           points(sampvalues,testbeta,type="l",col="red")
             }

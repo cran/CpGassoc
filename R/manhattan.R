@@ -83,7 +83,7 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
      else{
         chrcolor[which(chrcolor=="7" | chrcolor=="15" | chrcolor=="23")]="orange"
       }
-      y.lab<-c(0,max(-log(.05/cutoff,base=10),score)+.05)
+      y.lab<-c(0,max(-log(.05/cutoff,base=10),score,na.rm=TRUE)+.05)
     plot(range(genomepos),y.lab,type="n",xaxt='n',bty='7',xlab="chromosome",
           ylab=expression(paste("Observed -log ", scriptstyle(10), "(P-values)",sep="")),main=main.title,...)
     points(genomepos,score,col=chrcolor,cex=.2)

@@ -52,7 +52,7 @@ An unlimited number of CpG sites can be selected for plotting by specifying eith
 }
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 
@@ -77,8 +77,8 @@ scatterplot(test,c(1:3))
 scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"))
 
 ##Plotting something that is categorical in nature:
-test2<-cpg.assoc(samplecpg,factor(samplepheno$Disease),large.data=FALSE)
-scatterplot(test2,c(2))
+test2<-cpg.assoc(samplecpg[1:200,],factor(samplepheno$Disease),large.data=FALSE)
+scatterplot(test2,c(2),beta.values=samplecpg[1:200,])
 }
 
 \keyword{ ~kwd1 }

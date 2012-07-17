@@ -38,7 +38,7 @@ Returns a list containing the full and reduced design matrices.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 The \code{design} function  is designed to be used exclusively by the \code{cpg.assoc} and \code{cpg.perm} functions.

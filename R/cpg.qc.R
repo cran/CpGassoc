@@ -1,5 +1,5 @@
 cpg.qc <-
-function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE) {
+function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE,sig.return=FALSE) {
 
 #Get measures of mean intensity, use this to flag low-signal individuals for removal
     avg_sig=colMeans(siga+sigb,na.rm=TRUE)
@@ -23,25 +23,33 @@ function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,c
 #Remove low-signal individuals from original beta value file
     beta.orig=beta.orig[,!flag_to_remove]
 
+        
     beta.new<-as.matrix(beta.new)
 #Use beta.orig values to set bad data points to missing, then discard
 #(Bad data points are those set to missing by GenomeStudio, usually due to 0 signal or Nbead < 3)
     beta.new[is.na(beta.orig)] = NA
-    rm(beta.orig)
-    gc()
+    
+  
 
 #Remove low-signal individuals
     pval=pval[,!flag_to_remove]
 
 #Set to missing any values with detection p-values > cutoff
     beta.new[pval>p.cutoff] = NA
-    rm(pval)
+    
+        if(sig.return) {
+          siga<-as.matrix(siga)
+          sigb<-as.matrix(sigb)
+          siga[which(is.na(beta.orig) | pval>p.cutoff)]=NA
+          sigb[which(is.na(beta.orig) | pval>p.cutoff)]=NA
+          }
+    rm(beta.orig,pval)
     gc()
 
 #Optional checks removing any sample or sites with missing rate above a user-specified cutoff
     if(!is.null(sample.miss) | !is.null(cpg.miss)) {
       missing.location<-which(is.na(beta.new))
-      sample.missing<- (missing.location %/% nrow(beta.new)) +1
+      sample.missing<-(missing.location %/% nrow(beta.new)) +1
       cpg.missing<-missing.location %% nrow(beta.new)
       cpg.missing[which(cpg.missing==0)]<-nrow(beta.new)
       cpg.missing.table<-table(cpg.missing)/ncol(beta.new)
@@ -52,7 +60,11 @@ function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,c
       	remove.cpg<-as.numeric(names(remove.cpg))
    	    if(length(remove.cpg)>0) {
 		      beta.new<-beta.new[-remove.cpg,]
-      	}
+    	    if(sig.return) {
+    	       siga<-siga[-remove.cpg,]
+    	       sigb<-sigb[-remove.cpg,]
+    	         }
+          }
         print(paste("Removed",length(remove.cpg),"CpG sites with missing data for >",cpg.miss,"of samples"))
       	}
       if(!is.null(sample.miss)) {
@@ -60,9 +72,18 @@ function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,c
       	remove.samp<-as.numeric(names(remove.samp))
       	if(length(remove.samp)>0) {
       		beta.new<-beta.new[,-remove.samp]
-      	}
+    	    if(sig.return) {
+    	       siga<-siga[,-remove.samp]
+    	       sigb<-sigb[,-remove.samp]
+    	        	     }
+             }
         print(paste("Removed",length(remove.samp),"samples with missing data for >",sample.miss,"of CpG sites"))
         }
     }
-    beta.new
+    if(!sig.return) {
+        beta.new
+       }
+    else{
+        list(beta.new,siga,sigb)
+        }
     }

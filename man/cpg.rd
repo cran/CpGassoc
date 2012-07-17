@@ -5,10 +5,12 @@
 \alias{print.cpg}
 \alias{sort.cpg}
 
+
 \title{Methods for object of class \code{"cpg"}}
 
 \usage{
-  \method{plot}{cpg}(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), \dots)
+
+  \method{plot}{cpg}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), gc.p.val = FALSE, \dots)
 
   \method{summary}{cpg}(object,\dots)
 
@@ -16,8 +18,9 @@
 
   \method{sort}{cpg}(x,decreasing,\dots)
 }
+
 \arguments{
-  \item{x}{
+   \item{x}{
 Output of class \code{"cpg"} from cpg.assoc or cpg.work.
 }
   \item{save.plot}{
@@ -46,6 +49,9 @@ Main title to be put on the graph. If \code{NULL} one based on the analysis will
 Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the
 \code{postscript} function.
 }
+  \item{gc.p.val}{
+Logical. If true, plot will use the genomic control adjusted p-values.
+}
   \item{object}{
 Output of class \code{"cpg"} from \code{cpg.assoc} or \code{cpg.work}.
   }
@@ -56,7 +62,6 @@ logical. Should the sort be increasing or decreasing? Not available for partial 
 Arguments to be passed to methods, such as graphical parameters.
 }
 }
-
 \description{
 Methods and extra functions for class \code{"cpg"}.
 \code{plot.cpg} creates a QQ plot based on the association p-values or t-statistics from the function \code{cpg.assoc}.
@@ -69,7 +74,7 @@ Methods and extra functions for class \code{"cpg"}.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 Plots with empirical confidence intervals based on permutation tests can be obtained from \code{cpg.perm}.
@@ -92,7 +97,7 @@ See \code{\link{plot.cpg.perm}} for more info.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 ##QQ Plot:
 data(samplecpg,samplepheno,package="CpGassoc")
-test<-cpg.assoc(samplecpg,samplepheno$weight,data.frame(samplepheno$Distance,samplepheno$Dose),large.data=FALSE)
+test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 plot(test)
 ##t-statistic plot:
 plot(test,tplot=TRUE)
@@ -108,7 +113,6 @@ head(sort(test)$results)
 ##Summary
 summary(test)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{ ~kwd1 }
 \keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
