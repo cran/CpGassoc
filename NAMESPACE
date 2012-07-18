@@ -15,4 +15,6 @@ S3method(cpg.everything,logical)
 S3method(cpg.everything,matrix)
 S3method(cpg.everything,complex)
 S3method(cpg.everything,numeric)
+S3method(print,cpg.gc)
+S3method(print,cpg.perm.gc)
 

@@ -8,14 +8,16 @@ function(x,i.p,levin,chip.id,...) {
               temp<-try(anova(lme(zz~p,random=~1|factor(chip.id),na.action=na.omit)),silent=TRUE)
               temp<-as.matrix(temp)
               if(length(temp)<2) {
-                info<-matrix(NA,2)}
+                info<-matrix(NA,3)}
               else {
                 if(temp[nrow(temp),4]==0) {
                   info<-c(temp[nrow(temp),3],df(temp[nrow(temp),3],temp[nrow(temp),1],temp[nrow(temp),2]))
                       }
                 else { 
                    info<-temp[nrow(temp),3:4]
-                      }}
+                      }
+                   info<-c(info,temp[nrow(temp),2])
+                   }
               info
               }}
         else {
@@ -24,7 +26,7 @@ function(x,i.p,levin,chip.id,...) {
               temp<-try(anova(lme(zz~p+i.p,random=~1|factor(chip.id),na.action=na.omit)),silent=TRUE)
               temp<-as.matrix(temp)
               if(length(temp)<2) {
-                info<-matrix(NA,2)}
+                info<-matrix(NA,3)}
               else {
                 if(temp[nrow(temp),4]==0) {
                   info<-c(temp[nrow(temp),3],df(temp[nrow(temp),3],temp[nrow(temp),1],temp[nrow(temp),2]))
@@ -32,6 +34,7 @@ function(x,i.p,levin,chip.id,...) {
                 else { 
                    info<-temp[nrow(temp),3:4]
                       }
+                info<-c(info,temp[nrow(temp),2])
           }
           info
                 } }}

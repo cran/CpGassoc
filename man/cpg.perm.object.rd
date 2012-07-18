@@ -8,7 +8,7 @@
 Methods for object of class \code{"cpg.perm"}.
 }
 \usage{
-  \method{plot}{cpg.perm}(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, ...)
+  \method{plot}{cpg.perm}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, gc.p.val = FALSE, ...)
 
   \method{summary}{cpg.perm}(object,\dots)
 
@@ -50,6 +50,9 @@ Logical. If \code{TRUE}, the confidence intervals computed will be from the perm
 Logical. If \code{TRUE}, a classic qq-plot will be generated, with all p-values plotted against predicted values (including significant).
 If \code{FALSE} Holm-significant CpG sites will not be used to compute expected quantiles and will be plotted separately.
 }
+  \item{gc.p.val}{
+Logical. If true, plot will use the genomic control adjusted p-values.
+}
   \item{object}{
 Output of class \code{"cpg.perm"} from \code{"cpg.perm"}.
   }
@@ -68,7 +71,7 @@ Methods and extra functions for class \code{"cpg.perm"}.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 Empirical confidence intervals will be computed only if there are a hundred or more permutations. Otherwise the theoretical confidence intervals will be plotted.
@@ -88,8 +91,7 @@ data(samplecpg,samplepheno,package="CpGassoc")
 ###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
 ##This will involve partitioning up the data and performing more gc() to clear up space
 #The qq plot:
-Testperm<-cpg.perm(samplecpg,samplepheno$weight,data.frame(samplepheno$Dose,samplepheno$Distance),
-                seed=2314,nperm=10,large.data=FALSE)
+Testperm<-cpg.perm(samplecpg[1:300,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)
 plot(Testperm)
 #The t-statistic plot from cpg.perm has confidence intervals since we were allowed to perform permutations on the T-values.
 plot(Testperm,tplot=TRUE)

@@ -58,7 +58,7 @@ Arguments to be passed to methods, such as graphical parameters.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 \option{cpgname}, \option{chr}, and \option{pos} must be sorted in the same order, so that the first cpgname[1] corresponds to chr[1] and pos[1], and so on. 

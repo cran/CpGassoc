@@ -31,7 +31,7 @@ A list containing the \code{"cpg"} objects that are desired to be consolidated.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 This is designed to be used by \code{cpg.assoc} when it does analysis on large data sets or by the user if they split up the analysis by chromosome or some other such partition.

@@ -94,15 +94,15 @@ Data.frame or matrix of covariates, if specified (otherwise \code{NULL}).
 chip.id vector, if specified (otherwise \code{NULL}).
   }
   \item{coefficients}{
-A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. 
-The degrees of freedom is used in \code{\link{plot.cpg}} to compute the expected t-statistics.\cr
-If indep is a categorical variable this object will be \code{NULL}.
+A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. 
+The degrees of freedom is used in \code{\link{plot.cpg}} to compute the genomic inflation factors.\cr
+
   }
 }
 
 \author{
 Barfield, R.; Conneely, K.; Kilaru,V.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 \seealso{
@@ -116,6 +116,7 @@ Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
 \code{\link{sort.cpg.perm}}
 \code{\link{sort.cpg}}
 \code{\link{cpg.qc}}
+\code{\link{cpg.GC}}
 }
 \examples{
  # Sample output from CpGassoc
@@ -132,14 +133,8 @@ covar<-data.frame(samplepheno$Distance,samplepheno$Dose)
 test2<-cpg.assoc(samplecpg,samplepheno$weight,covar,large.data=FALSE)
 
 
-#Testing to see if equal:
-all.equal(test,test2)
-
 #Doing a mixed effects model. This does take more time, so we will do a subset of
 #the samplecpg
 randtest<-cpg.assoc(samplecpg[1:10,],samplepheno$weight,chip.id=samplepheno$chip,random=TRUE,large.data=FALSE)
-
-#summary function will work on items of class cpg.
-summary(test)
           }
 

@@ -97,19 +97,20 @@ covariates & & Data.frame or matrix of covariates, if specified (otherwise \Rfun
 
 chip & & chip.id vector, if specified (otherwise \Rfunction{NULL}). \\\\
 
-coefficients & & A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the expected t-statistics. If indep is a categorical variable this object will be \Rfunction{NULL}. \\\\
+coefficients & & A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the genomic inflation factors. \\\\
+
 
 \end{longtable}
 
 \subsection*{\small Authors}
 Barfield, R.; Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small See Also}
 \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
 \hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
 \hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
-\hyperlink{cpg.qc}{cpg.qc}
+\hyperlink{cpg.qc}{cpg.qc}, \hyperlink{cpg.GC}{cpg.GC}
 
 
 \subsection*{\small Examples}
@@ -173,7 +174,7 @@ indo.data & & An object of class \Rclass{cpg} that is the consolidated version o
 
 \subsection*{\small Authors}
 Barfield, R.;Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small Note}
 This is designed to be used by \Rfunction{cpg.assoc} when it does analysis on large data sets or by the user if they split up the analysis by chromosome or some other such partition.
@@ -261,18 +262,20 @@ perm.p.values & & A data frame consisting of the permutation P-values, and the n
 perm.tstat & & If one hundred or more permutations were performed and indep is a continuous variable, consists of the quantile .025 and .975 of observed t-statistcs for each permutation, ordered from smallest to largest. perm.tstat is used by \Rfunction{plot.cpg.perm} to compute the confidence intervals for the QQ plot of t-statistics. Otherwise \texttt{NULL}.\\\\
 
 perm.pval & & If one hundred or more permutations were performed, consists of the observed p-values for each permutation, ordered from smallest to largest. perm.pval is usd by \Rfunction{plot.cpg.perm} to compute the confidence intervals for the QQ plot of the p-values. Otherwise \texttt{NULL}. \\\\
+
+gc.permutation.matrix & & Similar to the permutation.matrix only in relation to the genomic control adjusted p-values.\\\\
                                                                                                                                                                                                                                                              
 \end{longtable}
 
 \subsection*{\small Authors}
 Barfield, R.; Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small See Also}
 \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
 \hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
 \hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
-\hyperlink{cpg.qc}{cpg.qc}
+\hyperlink{cpg.qc}{cpg.qc}, \hyperlink{cpg.GC}{cpg.GC}
 
 \subsection*{\small Examples}
 <<>>=
@@ -293,6 +296,64 @@ all.equal(Testperm$results,test$results)
 #summary function works on objects of class cpg.perm
 summary(Testperm)
 
+@
+
+\hypertarget{cpg.GC}
+\noindent \line(1,0){400}\\
+\begin{tabular}{ l   p{1cm}  p{10cm}}
+
+cpg.GC & & \itshape For genomic control adjusted statistics.\\
+\end{tabular}\\
+\noindent \line(1,0){400}\\
+
+\fontsize{4mm}{5mm}\selectfont
+\subsection*{\small Description}
+\noindent \small \Rfunction{cpg.GC} accepts an object of class \Rclass{cpg.perm} or \Rclass{cpg} and returns information
+regarding Holm and FDR-significance of the GC (genomic control) adjusted test statistics. For \Rclass{cpg.perm}
+will return permutation p-values based on the GC-adjusted values from each permutation.
+
+\subsection*{\small Usage}
+cpg.GC(x)
+
+\subsection*{\small Arguments}
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+x & & Object of class \Rclass{cpg.perm} or \Rclass{cpg}. .\\\\
+
+\end{longtable}
+
+\subsection*{\small Details}
+\noindent \Rclass{cpg.GC} will display the number of Holm and FDR-significant sites using the genomic control adjusted p-values
+test statistics. It will also display the estimated genomic control inflation factor.
+
+\subsection*{\small Value}
+\Rfunction{cpg.GC} returns an object of class \Rclass{cpg.gc} or \Rclass{cpg.perm.gc}\\
+
+\begin{longtable}{l p{1cm}   p{10cm} }
+
+gc.results & & Matrix consisting of GC-adjusted test statistics for each CpG site. Similar to the results output of \hyperlink{cpg.assoc}{cpg.assoc}.  \\\\
+
+gc.info & & Data frame with information on the number of Holm and FDR significant sites. Will also have the genomic control inflation estimate. Objects from \hyperlink{cpg.perm}{cpg.perm} will also have information concerning the permutation p-values.\\\\
+
+                                                                                                                                                                                                                                                         
+\end{longtable}
+\subsection*{\small Authors}
+Barfield, R.; Conneely, K.; Kilaru,V.\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
+
+\subsection*{\small See Also}
+\hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.work}{cpg.work}, \hyperlink{class.cpg}{plot.cpg}
+\hyperlink{scatterplot}{scatterplot}, \hyperlink{cpg.combine}{cpg.combine}, \hyperlink{manhattan}{manhattan},
+\hyperlink{perm.class}{plot.cpg.perm}, \hyperlink{perm.class}{sort.cpg.perm}, \hyperlink{class.cpg}{sort.cpg},
+\hyperlink{cpg.qc}{cpg.qc}
+\subsection*{\small Examples}
+<<>>=
+library(CpGassoc)
+data(samplecpg,samplepheno,package="CpGassoc")
+results<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
+
+cpg.GC(results)
+##If the genomic inflation factor is less than one there is no need for adjustment
 @
 
 
@@ -346,7 +407,7 @@ are ordered similarly with respect to samples and CpG sites.
 
 \subsection*{\small Authors}
 Barfield, R.; Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small See Also}
 \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{class.cpg}{plot.cpg}
@@ -431,13 +492,13 @@ covariates & & If covariates was non \Rfunction{NULL}, the covariates will be in
 
 chip & & If chip.id was non \Rfunction{NULL}, the chip will be included. Otherwise will be \Rfunction{NULL}. \\\\
 
-coefficients & & A data frame consisting of the residual degrees of freedom, the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. This item will only be returned if indep is continuous. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the estimated t-statistics. If indep is a categorical variable this object will be \texttt{NULL}.\\\\
+coefficients & & A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. The degrees of freedom is used in \hyperlink{class.cpg}{plot.cpg} to compute the genomic inflation factors. \\\\
 
 \end{longtable}
 
 \subsection*{\small Authors}
 Barfield, R.; Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small See Also}
 \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{class.cpg}{plot.cpg}
@@ -492,7 +553,7 @@ reduced & & The reduced design matrix\\\\
 
 \subsection*{\small Author}
 Barfield, R.; Kilaru,V.; Conneely, K.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small Note}
 The design function  is designed to be used exclusively by the cpg.assoc and cpg.perm functions.
@@ -573,7 +634,7 @@ color.list & & A vector of custom colors to be used for each chromosomes in the 
 
 \subsection*{\small Authors}
 Barfield, R.;Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small Note}
 \Robject{cpgname}, \Robject{chr}, and \Robject{pos} must be sorted in the same order, so that the first cpgname[1] corresponds to chr[1] and pos[1], and so on. 
@@ -615,7 +676,7 @@ Object of class cpg & & \itshape Methods for object of class\\
 \fontsize{4mm}{5mm}\selectfont
 \subsection*{\small Usage}
 
-plot.cpg(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), \dots)\\
+plot.cpg(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), gc.p.val = FALSE, \dots)\\
 
 \noindent summary.cpg(object,\dots)\\
 
@@ -643,6 +704,8 @@ main.title & & Main title to be put on the graph. If \texttt{NULL} one based on 
 
 eps.size & & Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the \texttt{postscript} function. \\\\
 
+gc.p.val & & Logical. If \texttt{TRUE}, plot will use the genomic control adjusted p-values.\\\\
+
 object & & Output of class \Rclass{cpg} from \texttt{cpg.assoc} or \texttt{cpg.work}. \\\\
 
 decreasing & & Logical. Should the sort be increasing or decreasing? Not available for partial sorting.\\\\
@@ -666,7 +729,7 @@ decreasing & & Logical. Should the sort be increasing or decreasing? Not availab
 \subsection*{\small Authurs}
 
 Barfield, R.; Kilaru,V.; Conneely, K.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small Note}
 \noindent Plots with empirical confidence intervals based on permutation tests can be obtained from \texttt{cpg.perm}.\\
@@ -719,7 +782,7 @@ Object of class cpg.perm & & \itshape Methods for object of class \Rclass{cpg.pe
 \fontsize{4mm}{5mm}\selectfont
 \subsection*{\small Usage}
 
-plot.cpg.perm(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, ...)
+plot.cpg.perm(x, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, gc.p.val = FALSE, ...)
 
 \noindent summary.cpg.perm(object,\dots)
 
@@ -753,6 +816,8 @@ perm.ci & & Logical. If \texttt{TRUE}, the confidence intervals computed will be
 
 classic & & Logical. If \texttt{TRUE}, a classic qq-plot will be generated, with all p-values plotted against predicted values (including significant). If \texttt{FALSE} Holm-significant CpG sites will not be used to compute expected quantiles and will be plotted separately.\\\\
 
+gc.p.val & & Logical. If \texttt{TRUE}, plot will use the genomic control adjusted p-values.\\\\
+
 object & & Output of class \Rclass{cpg.perm} from \Rclass{cpg.perm}.\\\\
 
 decreasing & & Logical. Should the sort be increasing or decreasing? Not available for partial sorting.\\\\
@@ -763,7 +828,7 @@ decreasing & & Logical. Should the sort be increasing or decreasing? Not availab
 
 \subsection*{\small Authors}
 Barfield, R.; Kilaru,V.; Conneely, K.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small Note}
 Empirical confidence intervals will be computed only if there are a hundred or more permutations. Otherwise the theoretical confidence intervals will be plotted.
@@ -844,7 +909,7 @@ An unlimited number of CpG sites can be selected for plotting by specifying eith
 
 \subsection*{\small Authors}
 Barfield, R.; Conneely, K.; Kilaru,V.\\
-Maintainer: R. Barfield: \href{mailto:richard.thomas.barfield@emory.edu}{richard.thomas.barfield@emory.edu}\\
+Maintainer: R. Barfield: \href{mailto:rbarfield01@fas.harvard.edu}{rbarfield01@fas.harvard.edu}\\
 
 \subsection*{\small See Also}
 \hyperlink{cpg.assoc}{cpg.assoc}, \hyperlink{cpg.perm}{cpg.perm}, \hyperlink{manhattan}{manhattan}, \hyperlink{cpg.work}{cpg.work},

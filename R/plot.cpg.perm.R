@@ -1,5 +1,6 @@
 plot.cpg.perm <-
-function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.size=c(5,5),tplot=FALSE,perm.ci=TRUE,classic=TRUE,...) {
+function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.size=c(5,5),tplot=FALSE,perm.ci=TRUE,classic=TRUE,
+          gc.p.val=FALSE,...) {
   if(x$perm.p.values$nperm <  100 | !perm.ci) {
         plot.cpg(x,save.plot,tplot,...) }
 
@@ -20,7 +21,43 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
           }
         }
   ob=x$results[which(!is.na(x$results$P.value)),]
-    gcvalue<-format(median(-log(ob$P.value,base=10))/.30103,digits=3)
+   if(!is.factor(x$indep)) {
+      
+      gcvalue<-format(median(ob$T.statistic**2)/0.4549364,digits = 3)
+      }
+      
+ else{
+     gcvalue<-format((nlevels(x$indep)-1)*median(ob$F.statistic)/qchisq(.5,nlevels(x$indep)-1),digits = 3)
+        }
+     
+     
+  gcvalue<-paste("Genomic control factor = ", gcvalue,sep="")
+  
+    if(gc.p.val) {
+        ob$P.value<-ob$gc.p.value
+        fdr.method<-x$info$FDR.method
+        holm.adj<-p.adjust(ob$P.value,"holm")
+     if (fdr.method=="qvalue") {
+        library(qvalue)
+        fdr.adj<-try(qvalue(ob$P.value),silent=TRUE)
+         if(class(fdr.adj)=="try-error") {
+          fdr.adj <- try(qvalue(ob$P.value, pi0.method = "bootstrap"),silent=TRUE)
+          if(class(fdr.adj)=="try-error") {
+         fdr.method="BH"
+        }}
+
+          }
+    if(fdr.method!="qvalue") {
+          fdr.adj<-p.adjust(ob$P.value,fdr.method)
+          }
+    x$FDR.sig<-subset(ob,fdr.adj<.05)
+    x$Holm.sig<-subset(ob,holm.adj<.05)
+    
+    
+          }
+          
+  
+  
   u=(1:nrow(ob)-1/2)/nrow(ob)
   pvalues<-ob$P.value
   adjusp<-p.adjust(ob$P.value,"holm")
@@ -46,13 +83,16 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
        main.title<-paste("QQ plot for association\nbetween methylation and",
             nam.ind)
           }
+    if(gc.p.val) {
+        main.title<-paste("GC adjusted P-values:",main.title)
+          }
      ob<-ob$P.value
     k=order(ob)
     plot(-log(u,base=10),-log(sort(pvalues),base=10),xlab=expression(paste("Expected -log", scriptstyle(10), "(P-values)",sep="")),
             ylab=expression(paste("Observed -log ", scriptstyle(10), "(P-values)",sep="")),main=main.title,ylim=c(0,-log(min(ob),base=10)),cex=pointsizefunction(sort(pvalues)),...)
     
     
-    legend(0,-log(min(ob),base=10),c("Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),"95% confidence interval",paste("Genomic control factor = ", gcvalue,sep="")),lty=c(-1,-1,2,NA),pch=c(19,1,-1,NA),col=c("red","red","black","black"))
+    legend(0,-log(min(ob),base=10),c("Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),"95% confidence interval",gcvalue),lty=c(-1,-1,2,NA),pch=c(19,1,-1,NA),col=c("red","red","black","black"))
     
     if(sig>0) {
       if(nrow(x$Holm.sig) >0){
@@ -91,33 +131,46 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
        main.title<-paste("Expected vs. Observed T-statistics",
             "for association\nbetween methylation and",x$info$Phenotype)
           }
+       if(gc.p.val) {
+        main.title<-paste("GC adjusted T-statistics:",main.title)
+          }
+    
   
     k=order(ob$T.statistic)
     index3<-ob$T.statistic %in% x$FDR.sig$T.statistic
 
     index3<-index3[k]
-    df_use<-x$coefficients[k,1]
+    
+    ob<-ob[k,]
+    if(ncol(x$coefficients)==5) {
+          df_use<-x$coefficients[!is.na(x$coefficients[,2]),2][k]
+           }
+    if(ncol(x$coefficients)==4) {
+          df_use<-x$coefficients[!is.na(x$coefficients[,1]),1][k]
+        }
     t.val<-qt(u2,df_use)
 
     adjusp<-adjusp[k]
-     tstatistic<-ob$T.statistic[k]
+    tstatistic<-ob$T.statistic[k]
     if(sig>0) { nonsig<-ob$T.statistic[-(which(ob$T.statistic %in% x$FDR.sig$T.statistic))]}
      else {nonsig<-ob$T.statistic}
 
     k2<-order(nonsig)
     remsig<-which(ob$T.statistic %in% x$FDR.sig$T.statistic)
-    if(!classic) {
+  if(!classic) {
         tstatistic <-nonsig[k2]
         if(length(remsig)>0) {
-          df_use<-x$coefficients[-(remsig),1][k2]
-                 }}
+             df_use<-df_use[-remsig][k2]
+                }}
     y.val<-ob$T.statistic[k]
     t.val2<-qt(u,df_use)
-    qqplot(t.val2,tstatistic,xlab="Expected",ylab="Observed",main=main.title,xlim=c(min(t.val),max(t.val)),ylim=c(min(y.val),max(y.val)),...)
+    x.lim<-c(min(t.val,na.rm=TRUE),max(t.val,na.rm=TRUE))
+    y.lim<-c(min(y.val,na.rm=TRUE),max(y.val,na.rm=TRUE))
+    qqplot(t.val2,tstatistic,xlab="Expected",ylab="Observed",main=main.title,xlim=x.lim,ylim=y.lim,...)
 
 
-    legend(min(t.val),max(y.val),c("Holm-significant","Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),paste("FDR-significant (",as.character(x$info$FDR.method),")"),
-                                    "95% confidence interval",paste("Genomic control factor = ", gcvalue,sep="")),lty=c(-1,-1,-1,-1,2,NA),pch=c(19,19,1,1,-1,NA),col=c("red","green","red","green","black","black"))
+    legend(min(t.val,na.rm=TRUE),max(y.val,na.rm=TRUE),c("Holm-significant","Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),paste("FDR-significant (",as.character(x$info$FDR.method),")"),
+                                    "95% confidence interval",gcvalue),lty=c(-1,-1,-1,-1,2,NA),pch=c(19,19,1,1,-1,NA),col=c("red","green","red","green","black","black"))
  
     if(sig>0) {
       holmreds<-which(adjusp<.05 & (y.val>0) )
@@ -133,7 +186,7 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
            }
         }
       if(nrow(x$Holm.sig)==0 | nrow(x$Holm.sig) < nrow(x$FDR.sig)) {
-        sorted<-ob$P.value[k]
+        sorted<-ob$P.value
         holmlered<-which(adjusp > .05 & (sorted %in% x$FDR.sig$P.value) & y.val >0)
         holmlegreen<-which(adjusp > .05 & sorted %in% x$FDR.sig$P.value & y.val<0)
         if(!classic){

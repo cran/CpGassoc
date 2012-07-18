@@ -63,6 +63,9 @@ The item returned will be of class \code{"cpg.perm"}. It will contain all of the
 \item{permutation.matrix}{
 A matrix consisting of the minimum observed P-value, the number of Holm significant CpG sites, and the number of FDR significant sites for each permutation.
 }
+\item{gc.permutation.matrix}{
+Similar to the permutation.matrix only in relation to the genomic control adjusted p-values.
+}
 \item{perm.p.values}{
 A data frame consisting of the permutation P-values, and the number of permutations performed.
   }
@@ -78,7 +81,7 @@ the confidence intervals for the QQ plot of the p-values. Otherwise NULL.
 
 \author{
 Barfield, R.; Conneely, K.; Kilaru,V.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 
@@ -100,8 +103,7 @@ data(samplecpg,samplepheno,package="CpGassoc")
 ###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
 ##This will involve partitioning up the data and performing more gc() to clear up space
 #Performing a permutation 10 times
-Testperm<-cpg.perm(samplecpg,samplepheno$weight,data.frame(samplepheno$Dose,samplepheno$Distance),
-                seed=2314,nperm=10,large.data=FALSE)
+Testperm<-cpg.perm(samplecpg[1:200,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)
 Testperm
 #All the contents of CpGassoc are included in the output from Testperm
 

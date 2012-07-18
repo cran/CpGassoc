@@ -13,7 +13,7 @@ sites that have a missing rate above a user-specified value.
 Finally, users can opt to compute beta values as M/(U+M) or M/(U+M+100).
 }
 \usage{
-cpg.qc(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE)
+cpg.qc(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE,sig.return=FALSE)
 }
 
 \arguments{
@@ -42,6 +42,9 @@ Optional cutoff value. If specified, cpg.qc will remove samples where the propor
   \item{constant100}{
 Logical. If true, the new beta values will be calculated as M/(U+M+100); if false (default) they will be calculated as M/(U+M).
 }
+  \item{sig.return}{
+Logical. If true, cpg.qc returns the qced signal data as well.
+}
 }
 \details{
 It is important that all the matrices or data frames listed above (\option{pval}, \option{siga}, \option{sigb}, \option{beta.orig}) 
@@ -53,7 +56,7 @@ are ordered similarly with respect to samples and CpG sites.
 
 \author{
 Barfield, R.; Conneely, K.; Kilaru,V.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 
 \seealso{

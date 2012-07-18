@@ -33,7 +33,7 @@ A function created to do a bunch of much smaller tasks within \pkg{CpGassoc} bas
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <richard.thomas.barfield@emory.edu>
+Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \note{
 \code{cpg.everything} is designed to perform a multitude of smaller tasks for \code{cpg.assoc} that do not warrant a full

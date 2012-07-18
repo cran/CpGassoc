@@ -41,12 +41,11 @@ theholder<-list(covariates,chip.id)
 levin<-is.factor(indep)
 Problems<-which(beta.values<0 |beta.values >1)
 
-if(is.character(beta.values[,1])) {
+if(is.character(beta.values[1,1])) {
   stop("beta.values contains characters, matrix/data.frame must be all numeric\n")
   }
-ul<-data.frame(is.factor(indep),ncol(beta.values),ncol(beta.values)>=100,.05/ncol(beta.values))
-beta.col<-ncol(beta.values)
 
+beta.col<-ncol(beta.values)
 fdr <- beta.col >= 100
 
 if(fdr.method=="qvalue" & !fdr) {
@@ -81,7 +80,7 @@ if(logit.transform) {
           }
 
 if(!is.null(subset)){
-   beta.values<-as.matrix(beta.values[subset,])
+  beta.values<-as.matrix(beta.values[subset,])
   indep<-indep[subset]
   if(!is.null(covariates)){
       covariates<-data.frame(covariates[subset,]) }
@@ -89,6 +88,7 @@ if(!is.null(subset)){
        chip.id<-chip.id[subset]
         }
          }
+
 designmatrix<-design(covariates,indep,chip.id,random)
 f.design<-designmatrix[[1]]
 r.design<-designmatrix[[2]]
@@ -100,14 +100,19 @@ if(callarge) {rm(designmatrix)
   gc()
 }
 test.stat <- matrix(NA,beta.col,3)
+
 if (!levin) {
   e.s<-matrix(ncol=2,nrow=beta.col)
   stderror<-matrix(NA,beta.col)                  
   }
               
 else{ 
-    e.s<-NULL
-    stderror<-NULL   }
+    e.s<-stderror<-NULL
+   }
+
+df.gc<-matrix(nrow=beta.col,ncol=2)
+
+df.gc[,1]<-ifelse(levin,nlevels(indep)-1,1)
 
 if (random) {
   if(is.null(chip.id)) {
@@ -126,9 +131,10 @@ if(levin){
   library(nlme)
   ran.function<-cpg.everything(p,i.p,levin,chip.id)
   ran.info<-t(apply(beta.values,2,ran.function))
+
   test.stat[,1:2]<-ran.info[,1:2]
+  df.gc[,2]<-ran.info[,3]
   if(!levin) {
-    degr.f<-matrix(ran.info[,3],beta.col)
     e.s<-ran.info[,4:5]
     stderror[,1]<-abs(e.s[,2]/ran.info[,1])
      
@@ -146,35 +152,31 @@ else {
   nonmissing<-which(apply(is.na(beta.values),2,sum)==0) 
   non.m.beta<-as.matrix(beta.values[,nonmissing])
   if(callarge) gc()
-  degr.f<-matrix(n-ncol(f.design),beta.col)
-  beta<-try(solve(t(f.design) %*% f.design)%*% t(f.design) %*% non.m.beta,silent=TRUE)
+
+  beta<-try(solve(t(f.design) %*% f.design)%*% t(f.design) %*% non.m.beta,silent=TRUE)      
+  dfl<-list(df=n-ncol(f.design),df0=n-ncol(r.design))
+  df.gc[nonmissing,2]<-dfl$df
+
   if(class(beta)!="try-error") {
   
-    res<-non.m.beta-f.design %*% beta
-    dfl<-list(df=degr.f[1],df0=n-ncol(r.design))
-    ressq<-res^2        
-    if(callarge) { rm(res)
-        gc()
-        }   
+    ressq<-(non.m.beta-f.design %*% beta)^2
     ssef<-t(ressq)%*% matrix(1,dim(ressq)[1],1)
     if(callarge) {
         rm(ressq)
         gc()}
     beta0<-solve(t(r.design) %*% r.design)%*% t(r.design) %*% non.m.beta
-    r.res0<-non.m.beta-r.design %*% beta0
-    r.ressq<-r.res0^2
-    if(callarge) {
-      rm(r.res0)          
-      gc()}
+    r.ressq<-(non.m.beta-r.design %*% beta0)^2
     sser<-t(r.ressq)%*% matrix(1,dim(r.ressq)[1],1)   
     test.stat[nonmissing,1]<-(sser-ssef)/ssef*(dfl$df/(dfl$df0-dfl$df))
 
     test.stat[nonmissing,2]<-pf(test.stat[nonmissing,1],df1=(dfl$df0-dfl$df),df2=dfl$df,lower.tail=FALSE)
+
     #This rounding is for when cpgwork gets called during a permutation run
    
   test.stat[which(test.stat[,1]<0 & test.stat[,1] > -.001),1]<-0
      }
   if(class(beta)== "try-error") {
+
      if(!levin) {
         mono.lm2<-try(lm(non.m.beta~f.design[,-1]),silent=T)
         mono.results<-cpgassocsummary(mono.lm2)
@@ -195,7 +197,7 @@ else {
           mono.results<-aov(non.m.beta~r.design[,-1]+f.design[,2:(nlevels(indep))])
                    }
        test.stat[nonmissing,1:2]<-cpgassocsummary(mono.results)
-               }
+               }                                            
             }
   if(callarge) {
       rm(non.m.beta,sser,ssef,beta0,r.ressq)
@@ -203,51 +205,60 @@ else {
       }
   if(length(nonmissing)!=beta.col) {
     probsites<-which(is.na(test.stat[,2]))
-    if(!levin) {
-      for(i in probsites) {
-            
-        temp<-try(summary(lm(beta.values[,i]~f.design[,-1],subset=subset,x=TRUE)),silent=T)
-        if(class(temp)=="try-error")    {
-            stderror[i,]<-test.stat[i,1:2]<-degr.f[i]<-e.s[1,]<-NA
-            }
-        else{
-          stderror[i,]<-coef(temp)[2,2]
-          test.stat[i,1:2]<-temp$coefficient[2,3:4]
-          degr.f[i]<-temp$df[2]  
-          if(ncol(r.design)==1) {
-            e.s[i,]<-temp$coefficient[1:2,1]
+    if(levin) {
+      i.p<-f.design[,2:(nlevels(indep))]
+      }
+
+
+      
+     for(i in probsites) {
+        miss.check<-table(indep[!is.na(beta.values[,i])])
+        miss.check<-ifelse(sum(miss.check!=0)>1,1,0)
+        if(!levin) {
+          temp<-try(summary(lm(beta.values[,i]~f.design[,-1],x=TRUE)),silent=T)
+          
+          if(class(temp)=="try-error" | miss.check==0)    {
+            stderror[i,]<-test.stat[i,1:2]<-df.gc[i,1:2]<-e.s[1,]<-NA
+
             }
           else{
-            altdesign<-f.design[!is.na(beta.values[,i]),-2]
-            thecolmeans<-colMeans(altdesign[,colSums(altdesign)!=0])
-            if( length(thecolmeans)!=length(coef(temp)[-2,1]))  {
-              almost<-gsub(", -1","",gsub("f.design","",names(coef(temp)[-2,1])))
-              almost<-gsub("[[]]","",almost)
-              thecolmeans<-thecolmeans[which(names(f.design)[,-2] %in% almost)]
+       
+            df.gc[i,2]<-c(temp$df[2])
+            stderror[i,]<-coef(temp)[2,2]
+            test.stat[i,1:2]<-coef(temp)[2,3:4]
+            
+            if(ncol(r.design)==1) {
+              e.s[i,]<-coef(temp)[1:2,1]
+                }
+            else{
+      
+              altdesign<-f.design[!is.na(beta.values[,i]),-2]
+              thecolmeans<-colMeans(altdesign[,colSums(altdesign)!=0])
+              if( length(thecolmeans)!=length(coef(temp)[-2,1]))  {
+                almost<-gsub(", -1","",gsub("f.design","",names(coef(temp)[-2,1])))
+                almost<-gsub("[[]]","",almost)
+                thecolmeans<-thecolmeans[which(names(f.design)[,-2] %in% almost)]
+                }
+              newint<-sum(thecolmeans*(coef(temp)[-2,1]))
+              e.s[i,]<-c(newint,coef(temp)[2,1])
             }
-            newint<-sum(thecolmeans*(coef(temp)[-2,1]))
-            e.s[i,]<-c(newint,coef(temp)[2,1])
-         }
-         }
+            }
+            }
+         else{ 
+   
+           temp <- try(as.matrix(anova(lm(beta.values[,i]~r.design+i.p))),silent=T)
+        if(class(temp)=="try-error" | miss.check==0) {
+            test.stat[i,1:2]<-NA
+            }
+          else{
+            df.gc[i,2]<-tail(temp[,1],1)
+            test.stat[i,1:2] <- temp[nrow(temp)-1,4:5]
           }
+          } 
          }
-          
-    else{
-  
-      i.p<-f.design[,2:(nlevels(indep))]
 
-      for(i in probsites) {
-        temp <- try(as.matrix(anova(lm(beta.values[,i]~r.design+i.p,subset=subset))),silent=T)
-        if(class(temp)=="try-error") {
-          test.stat[i,1:2]<-NA
-          }
-        else{
-        test.stat[i,1:2] <- temp[nrow(temp)-1,4:5]
         }
-        }
-        }
-        }
-
+ 
   if(class(beta)!="try-error") {
 
   if(!levin) {
@@ -271,6 +282,15 @@ else {
      }
 
 
+  gcvalue<-df.gc[1,1]*median(ifelse(rep(levin,beta.col),test.stat[,1],test.stat[,1]**2),na.rm=TRUE)/qchisq(.5,df.gc[1,1])
+  gcvalue<-ifelse(gcvalue<1,1,gcvalue)
+  gc.p.val<-pf(ifelse(rep(levin,beta.col),test.stat[,1],test.stat[,1]**2)/gcvalue,df.gc[,1],df.gc[,2],lower.tail=FALSE)
+  if(random & gcvalue==1) {
+        gc.p.val<-test.stat[,2]
+        }
+  
+
+
 
 
 if (fdr & fdr.method=="qvalue") {
@@ -292,31 +312,33 @@ if (fdr & fdr.method=="qvalue") {
       }}
 
 if(!fdr | fdr.method!="qvalue") {
-       
-   test.stat<-cbind(test.stat,p.adjust(test.stat[,2],fdr.method))
+     test.stat<-cbind(test.stat,p.adjust(test.stat[,2],fdr.method))
     }
+if(beta.col==1) {callarge<-FALSE}
 
-if(is.null(dimnames(beta.values))& !callarge & beta.col>1) {dimnames(beta.values)[[2]]<-paste("X",1:beta.col,sep="") }
+if(is.null(dimnames(beta.values))& !callarge & beta.col>1) {colnames(beta.values)<-paste("X",1:beta.col,sep="") }
 if(is.null(dimnames(beta.values))& !callarge & beta.col==1) {dimnames(beta.values)<- list(seq(1,length(beta.values)),paste("X",1:beta.col,sep=""))}
+         
+if(is.null(colnames(beta.values)) & !callarge) { colnames(beta.values)<-paste("X",1:beta.col,sep="")}
 
-if(is.null(colnames(beta.values)) & !callarge) { dimnames(beta.values)[[2]]<-paste("X",1:beta.col,sep="")}
+if(beta.col==1){callarge<-TRUE}
 
-test.stat<-data.frame(dimnames(beta.values)[[2]],test.stat,stringsAsFactors=FALSE)
+test.stat<-data.frame(colnames(beta.values),test.stat,stringsAsFactors=FALSE)
 holmadjust<-p.adjust(test.stat[,3],"holm")
 test.stat[,4]<-ifelse(holmadjust>.05,FALSE,TRUE)
 if(sum(is.na(test.stat[,3]))>0) {
 test.stat[which(is.na(test.stat[,3])),4]<-FALSE
       }
 
+nonfactorinfo<-data.frame(df.top=df.gc[,1],df.bottom=df.gc[,2],stringsAsFactors=FALSE)
 if(!levin) {
-    row.names(degr.f)<-row.names(e.s)<-row.names(stderror)<-test.stat[,1]
-    nonfactorinfo<-data.frame(df.pred=degr.f,adj.intercept=e.s[,1],
+    nonfactorinfo<-data.frame(nonfactorinfo,adj.intercept=e.s[,1],
                 effect.size=e.s[,2],std.error=stderror,stringsAsFactors=FALSE)
           }
-else {
-     nonfactorinfo<-NULL
-      }
+row.names(nonfactorinfo)<-test.stat[,1]
+
 names(test.stat)<-cpg.everything(fdr,perm=FALSE,levin)
+test.stat<-data.frame(test.stat,gc.p.value=gc.p.val,stringsAsFactors=FALSE)
 Num.Cov<-ncol(data.frame(covariates))
 if(!is.null(chip.id) & !random) {Num.Cov<-Num.Cov+1}          
 INFO<-data.frame(Min.P.Observed=min(test.stat$P.value,na.rm = TRUE),Num.Cov,fdr.cutoff,FDR.method=fdr.method,Phenotype=nameholder[[3]],
