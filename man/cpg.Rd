@@ -10,7 +10,9 @@
 
 \usage{
 
-  \method{plot}{cpg}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE, tplot = FALSE, classic = TRUE, main.title = NULL, eps.size = c(5, 5), gc.p.val = FALSE, \dots)
+  \method{plot}{cpg}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE, 
+                     tplot = FALSE, classic = TRUE,main.title = NULL, eps.size = c(5, 5),
+                     gc.p.val = FALSE, gcdisplay = FALSE, \dots)
 
   \method{summary}{cpg}(object,\dots)
 
@@ -51,6 +53,9 @@ Vector indicating the size of .eps file (if creating one). Correponds to the opt
 }
   \item{gc.p.val}{
 Logical. If true, plot will use the genomic control adjusted p-values.
+}
+  \item{gcdisplay}{
+Logical.If true, plot will display the genomic control value in the legend.
 }
   \item{object}{
 Output of class \code{"cpg"} from \code{cpg.assoc} or \code{cpg.work}.
@@ -93,7 +98,8 @@ See \code{\link{plot.cpg.perm}} for more info.
 }
 \examples{
 ##Using the results from the example given in cpg.assoc.
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. 
+###The default option is true.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 ##QQ Plot:
 data(samplecpg,samplepheno,package="CpGassoc")

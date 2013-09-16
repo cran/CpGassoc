@@ -9,7 +9,9 @@ Calls \code{cpg.assoc} to get the observed P-values from the study and then perf
 In addition to the same test statistics computed by \code{cpg.assoc}, \code{cpg.perm} will compute the permutation p-values for the observed p-value, the number of Holm significant sites, and the number of FDR significant sites.
 }
 \usage{
-cpg.perm(beta.values, indep, covariates = NULL, nperm, data = NULL, seed = NULL, logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, fdr.method = "BH",large.data=TRUE)
+cpg.perm(beta.values, indep, covariates = NULL, nperm, data = NULL, seed = NULL,
+logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE,
+fdr.cutoff = 0.05, fdr.method = "BH",large.data=TRUE)
 }
 
 \arguments{
@@ -100,7 +102,8 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 \examples{
 ##Loading the data
 data(samplecpg,samplepheno,package="CpGassoc")
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
+###The default option is true.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 #Performing a permutation 10 times
 Testperm<-cpg.perm(samplecpg[1:200,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)

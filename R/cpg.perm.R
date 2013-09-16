@@ -26,7 +26,12 @@ if(is.character(indep)) {warnings("\nindep is a character class, converting to f
 
 
 
-if(!is.null(data))  attach(data,warn.conflicts=FALSE)
+if(!is.null(data)){
+  nameofdata<-deparse(substitute(data))
+  thecheck<-nameofdata %in% search()
+  if(!thecheck) stop("\nMust attach data before using data option in CpGassoc package",
+                     "\nPlease attach and resubmit command\n")  
+}
 if(is.matrix(covariates)| length(covariates)==length(indep) ) {
   if(is.character(covariates) &  is.matrix(covariates)) {
     stop("\nCan not analyze data with covariates given.\nNo characters allowed within",
@@ -163,9 +168,7 @@ if(nperm>=100) {
 perm.data$info$betainfo<-name.holder[[1]]
 rm(Permutation,ob.data,p.value.matrix)
 gc()
-if(!is.null(data)) {
-  detach(data)
-      }
+
 class(perm.data)<-"cpg.perm"
 perm.data
      }

@@ -8,7 +8,9 @@ Create a manhattan plot
 This function will produce a manhattan plot for the observed P-values from a object of class \code{"cpg"} or \code{"cpg.perm"}.
 }
 \usage{
-manhattan(x, cpgname, chr, pos, save.plot = NULL, file.type="pdf", popup.pdf = FALSE, eps.size = c(15, 5), main.title = NULL, cpg.labels = NULL, chr.list = NULL, color.list = NULL, ...)
+manhattan(x, cpgname, chr, pos, save.plot = NULL, file.type="pdf", 
+popup.pdf = FALSE, eps.size = c(15, 5), main.title = NULL, cpg.labels = NULL,
+chr.list = NULL, color.list = NULL, ...)
 }
 
 \arguments{
@@ -75,7 +77,8 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \examples{
 #Doing a Manhattan plot. First load the data:
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE. 
+###The default option is true.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 data(samplecpg,samplepheno,annotation,package="CpGassoc")
 

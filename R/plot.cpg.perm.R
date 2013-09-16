@@ -1,6 +1,6 @@
 plot.cpg.perm <-
 function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.size=c(5,5),tplot=FALSE,perm.ci=TRUE,classic=TRUE,
-          gc.p.val=FALSE,...) {
+          gc.p.val=FALSE,gcdisplay=FALSE,...) {
   if(x$perm.p.values$nperm <  100 | !perm.ci) {
         plot.cpg(x,save.plot,tplot,...) }
 
@@ -88,11 +88,21 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
           }
      ob<-ob$P.value
     k=order(ob)
+    legend.text.use<-c("Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),"95% confidence interval",gcvalue)
+    l.lty     <-c(-1,-1,2,NA)
+    l.pch     <-c(19,1,-1,NA)
+    l.col     <-c("red","red","black","black")
+    if(!gcdisplay){
+      legend.text.use<-legend.text.use[-4]
+      l.lty          <-l.lty[-4]
+      l.pch          <-l.pch[-4]
+      l.col          <-l.col[-4]
+    } 
     plot(-log(u,base=10),-log(sort(pvalues),base=10),xlab=expression(paste("Expected -log", scriptstyle(10), "(P-values)",sep="")),
             ylab=expression(paste("Observed -log ", scriptstyle(10), "(P-values)",sep="")),main=main.title,ylim=c(0,-log(min(ob),base=10)),cex=pointsizefunction(sort(pvalues)),...)
     
     
-    legend(0,-log(min(ob),base=10),c("Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),"95% confidence interval",gcvalue),lty=c(-1,-1,2,NA),pch=c(19,1,-1,NA),col=c("red","red","black","black"))
+    legend(0,-log(min(ob),base=10),legend.text.use,lty=l.lty,pch=l.pch,col=l.col)
     
     if(sig>0) {
       if(nrow(x$Holm.sig) >0){
@@ -166,11 +176,22 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
     t.val2<-qt(u,df_use)
     x.lim<-c(min(t.val,na.rm=TRUE),max(t.val,na.rm=TRUE))
     y.lim<-c(min(y.val,na.rm=TRUE),max(y.val,na.rm=TRUE))
+    legend.text.use<-c("Holm-significant","Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),paste("FDR-significant (",as.character(x$info$FDR.method),")"),
+                                    "95% confidence interval", gcvalue)
+    l.lty     <-c(-1,-1,-1,-1,2,NA)
+    l.pch     <-c(19,19,1,1,-1,NA)
+    l.col     <-c("red","green","red","green","black","black")
+    if(!gcdisplay){
+      legend.text.use<-legend.text.use[-6]
+      l.lty          <-l.lty[-6]
+      l.pch          <-l.pch[-6]
+      l.col          <-l.col[-6]
+    } 
+  
     qqplot(t.val2,tstatistic,xlab="Expected",ylab="Observed",main=main.title,xlim=x.lim,ylim=y.lim,...)
 
 
-    legend(min(t.val,na.rm=TRUE),max(y.val,na.rm=TRUE),c("Holm-significant","Holm-significant",paste("FDR-significant (",as.character(x$info$FDR.method),")"),paste("FDR-significant (",as.character(x$info$FDR.method),")"),
-                                    "95% confidence interval",gcvalue),lty=c(-1,-1,-1,-1,2,NA),pch=c(19,19,1,1,-1,NA),col=c("red","green","red","green","black","black"))
+    legend(min(t.val,na.rm=TRUE),max(y.val,na.rm=TRUE),legend.text.use,lty=l.lty,pch=l.pch,col=l.col)
  
     if(sig>0) {
       holmreds<-which(adjusp<.05 & (y.val>0) )

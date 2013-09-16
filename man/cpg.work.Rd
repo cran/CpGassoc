@@ -8,7 +8,9 @@ Does the analysis between the CpG sites and phenotype of interest
 Association Analysis Between Methylation Beta Values and Phenotype of Interest. This function contains the code that does the brunt of the work for \code{cpg.assoc} and \code{cpg.perm}.
 }
 \usage{
-cpg.work(beta.values, indep, covariates = NULL, data = NULL, logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, callarge = FALSE, fdr.method = "BH", logitperm = FALSE,big.split=FALSE)
+cpg.work(beta.values, indep, covariates = NULL, data = NULL, logit.transform = FALSE,
+chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, callarge = FALSE,
+fdr.method = "BH", logitperm = FALSE,big.split=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -13,7 +13,8 @@ sites that have a missing rate above a user-specified value.
 Finally, users can opt to compute beta values as M/(U+M) or M/(U+M+100).
 }
 \usage{
-cpg.qc(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,constant100=FALSE,sig.return=FALSE)
+cpg.qc(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,
+constant100=FALSE,sig.return=FALSE)
 }
 
 \arguments{
