@@ -25,7 +25,12 @@ if(is.character(indep)) {warnings("\nindep is a character class, converting to f
         }
 
 cpg.length(indep,nrow(beta.values),covariates, chip.id)
-if(!is.null(data)) {attach(data,warn.conflicts=FALSE)}
+if(!is.null(data)){
+  nameofdata<-deparse(substitute(data))
+  thecheck<-nameofdata %in% search()
+  if(!thecheck) stop("\nMust attach data before using data option in CpGassoc package",
+                     "\nPlease attach and resubmit command\n")  
+}
 
 if(is.matrix(covariates)| length(covariates)==length(indep))  {
   if(is.character(covariates) &  is.matrix(covariates)) {
@@ -128,7 +133,6 @@ if(levin){
  if(!is.null(covariates)) {i.p<-model.matrix(~indep)[,-1]}
  else { p<-model.matrix(~indep)[,-1]}
       }
-  library(nlme)
   ran.function<-cpg.everything(p,i.p,levin,chip.id)
   ran.info<-t(apply(beta.values,2,ran.function))
 
@@ -349,7 +353,6 @@ FDR.sites<- subset(test.stat,FDR<=fdr.cutoff)
 
 info.data<-list(results=test.stat,Holm.sig=holm.sites,FDR.sig=FDR.sites,
         info=INFO,indep=indep,covariates=theholder[[1]],chip=theholder[[2]],coefficients=nonfactorinfo)
-if(!is.null(data)) { detach(data) }
 rm(test.stat,holm.sites,INFO,FDR.sites,f.design,r.design,Problems,beta.values,
             e.s,indep,theholder)
 gc()

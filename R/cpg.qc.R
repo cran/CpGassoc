@@ -17,7 +17,7 @@ function(beta.orig,siga,sigb,pval,p.cutoff=.001,cpg.miss=NULL,sample.miss=NULL,c
     beta.new = sigb/(siga+sigb+const)
 
 #Clean up large files to make way for other files
-    rm(siga,sigb)
+    if(!sig.return) {rm(siga,sigb)}
     gc()
 
 #Remove low-signal individuals from original beta value file

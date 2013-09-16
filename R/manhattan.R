@@ -21,7 +21,7 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
  
     cpgtitle<-data.frame(cpglab=as.character(cpgname),chr,pos)
     
-    info<-merge(test,cpgtitle,by.x="CPG.Labels",by.y="cpglab")
+    info<-merge(test,cpgtitle,by.x="CPG.Labels",by.y="cpglab",sort=FALSE)
     score<-info$P.value
     cutoff<-length(score)-nrow(x$Holm.sig)+1
     if(cutoff>length(score)) cutoff=length(score)
@@ -37,7 +37,19 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
     pos=pos[k]
     
     score=-log(score[k],base=10)
-    cmax=max(chr)  
+    cmax=max(chr)
+    missingspots<-sum(is.na(chr))>0
+    if(is.na(cmax)){
+      probspots<-which(is.na(chr))
+      oldmax<-max(chr,na.rm=T)
+      chr[probspots]=oldmax+1
+      cmax<-max(chr)
+      topick<-range(pos[chr==oldmax])
+      pos[probspots]<-seq(topick[1],topick[2],length.out=length(probspots))
+      k=order(chr,pos)
+      chr=chr[k]
+      pos=pos[k]
+    }
 
     genomepos=pos
     if(!is.null(chr.list)) {
@@ -100,7 +112,7 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
        if(cpg.labels=="FDR" ) {
         if(nrow(x$FDR.sig)>0){
           fdr.cutoff<- -log(max(x$FDR.sig$P.value),base=10)
-          fdr.labels<-x$results$CPG.Labels[k][which(score>fdr.cutoff)]
+          fdr.labels<-x$results$CPG.Labels[k][which(score>=fdr.cutoff)]
           text(genomepos[which(score>fdr.cutoff)],score[which(score>fdr.cutoff)],labels=fdr.labels,pos='4',cex=.7) 
           }
         else{
@@ -129,9 +141,21 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
       labs[i]=chr_unique[i] 
       }
     if(cmax>=23) {
-      labs[which(labs==23)]="X"
-      if(sum(chr==24)>0) {labs[which(labs==24)]="Y"} 
+      if(!missingspots){
+        labs[which(labs==23)]="X"
+        if(sum(chr==24)>0) {labs[which(labs==24)]="Y"} 
         }
+      if(missingspots){
+        if(cmax>23){
+          labs[which(labs==23)]="X"
+        }
+        if(cmax>24){
+          labs[which(labs==24)]="Y"
+        }
+        labs[which(labs==cmax)]="NoInfo"
+
+      }
+    }
     axis(side=1,at=meds,lwd.ticks=0,labels=labs)
     axis(side=1,at=tix,lwd.ticks=1,labels=labs_null)
         

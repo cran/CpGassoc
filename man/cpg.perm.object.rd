@@ -8,7 +8,9 @@
 Methods for object of class \code{"cpg.perm"}.
 }
 \usage{
-  \method{plot}{cpg.perm}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE, main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE, gc.p.val = FALSE, ...)
+  \method{plot}{cpg.perm}(x, save.plot = NULL, file.type = "pdf", popup.pdf = FALSE,
+  main.title = NULL, eps.size = c(5, 5), tplot = FALSE, perm.ci = TRUE, classic = TRUE,
+  gc.p.val = FALSE, gcdisplay = FALSE, ...)
 
   \method{summary}{cpg.perm}(object,\dots)
 
@@ -53,6 +55,9 @@ If \code{FALSE} Holm-significant CpG sites will not be used to compute expected 
   \item{gc.p.val}{
 Logical. If true, plot will use the genomic control adjusted p-values.
 }
+  \item{gcdisplay}{
+Logical.If true, plot will display the genomic control value in the legend.
+}
   \item{object}{
 Output of class \code{"cpg.perm"} from \code{"cpg.perm"}.
   }
@@ -88,12 +93,14 @@ Empirical confidence intervals will be computed only if there are a hundred or m
 \examples{
 data(samplecpg,samplepheno,package="CpGassoc")
 ##We will do the analysis on a subset to save time
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
+###The default option is true.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 #The qq plot:
 Testperm<-cpg.perm(samplecpg[1:300,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)
 plot(Testperm)
-#The t-statistic plot from cpg.perm has confidence intervals since we were allowed to perform permutations on the T-values.
+#The t-statistic plot from cpg.perm has confidence intervals since we were allowed 
+#to perform permutations on the T-values.
 plot(Testperm,tplot=TRUE)
 #If there was 100 or more permutations, there would be emperical confidence intervals.
 

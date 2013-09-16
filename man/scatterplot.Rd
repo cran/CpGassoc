@@ -9,9 +9,10 @@ Plot beta values of individual CpG sites against the independent variable. Can c
 for any covariates that were included in the model.
 }
 \usage{
-scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,main.title=NULL, ...)
+scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", 
+eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,main.title=NULL, ...)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
   \item{x}{
 Object of class \code{"cpg"} or \code{"cpg.perm"}.
@@ -68,7 +69,8 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 \examples{
 #Load the data:
 data(samplecpg,samplepheno,package="CpGassoc")
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
+###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
+###The default option is true.
 ##This will involve partitioning up the data and performing more gc() to clear up space
 test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 ##Using rank, will plot the top three sites in order of significance:
