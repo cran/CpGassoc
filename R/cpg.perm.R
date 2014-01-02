@@ -125,7 +125,6 @@ for(i in 1:nperm) {
     if(!levin) {perm.tstat[,i]<-answers$results$T.statistic}
       }
   Permutation[i,1:3] <- c(answers$info$Min.P.Observed,nrow(answers$Holm.sig),nrow(answers$FDR.sig))
-
   if (fdr.method=="qvalue") {
       fdr.adj<-try(qvalue(answers$results$gc.p.value),silent=TRUE)
         if(class(fdr.adj)=="try-error") {
@@ -136,10 +135,12 @@ for(i in 1:nperm) {
   if(fdr.method!="qvalue") {
           fdr.adj<-p.adjust(answers$results$gc.p.value,fdr.method)
           }
+  if(fdr.method=="qvalue"){
+          fdr.adj<-fdr.adj$qvalue
+  }
   gc.Permutation[i,1:3]<-c(min(answers$results$gc.p.value,na.rm=TRUE),
                             sum(p.adjust(answers$results$gc.p.value,"holm")<.05),
                             sum(fdr.adj<.05))
-
   rm(answers)
   gc()
            }

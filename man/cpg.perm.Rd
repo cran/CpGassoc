@@ -39,7 +39,7 @@ logical. If \code{TRUE}, the logit transform of the beta values log(beta.val/(1-
 next smallest or  next largest value respectively; values <0 or >1 will be set to NA.
 }
   \item{chip.id}{
-An optional vector containing the chip information. If specified, chip id will be included as a factor in the model.
+An optional vector containing chip, batch identities, or other categorical factor of interest to the researcher. If specified, chip id will be included as a factor in the model.
 }
   \item{subset}{
 An optional logical vector specifying a subset of observations to be used in the fitting process.
