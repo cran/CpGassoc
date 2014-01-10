@@ -100,7 +100,9 @@ r.design<-designmatrix[[2]]
 
 n=nrow(f.design) 
 beta.values<-beta.values[designmatrix[[3]],]
-
+if(!is.null(chip.id)){
+	chip.id<-chip.id[designmatrix[[3]]]
+	}
 if(callarge) {rm(designmatrix)
   gc()
 }
