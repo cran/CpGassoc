@@ -64,10 +64,13 @@ fdr<-TRUE
 FDR<-matrix(NA,nrow(test.stat))
 holder<-which(!is.na(test.stat[,3]) | !is.nan(test.stat[,3]))
 if(fdr.method=="qvalue")  {
-library(qvalue)
-qv<-try(qvalue(test.stat[holder,3]),silent=TRUE)
+       if (!requireNamespace("qvalue", quietly = TRUE)) {
+            stop("qvalue needed for this to work. Please install it.",
+                      call. = FALSE)
+            }
+qv<-try(qvalue::qvalue(test.stat[holder,3]),silent=TRUE)
 if(length(qv)!=5) {
-    qv <- try(qvalue(test.stat[holder,3], pi0.method = "bootstrap"),silent=TRUE)
+    qv <- try(qvalue::qvalue(test.stat[holder,3], pi0.method = "bootstrap"),silent=TRUE)
     if(length(qv)!=5) {
       fdr<-FALSE
       warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg\n")

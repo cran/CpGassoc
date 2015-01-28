@@ -22,10 +22,13 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,tplot=FALSE,classic=TR
         fdr.method<-x$info$FDR.method
         holm.adj<-p.adjust(ob$P.value,"holm")
      if (fdr.method=="qvalue") {
-        library(qvalue)
-        fdr.adj<-try(qvalue(ob$P.value),silent=TRUE)
+        if (!requireNamespace("qvalue", quietly = TRUE)) {
+            stop("qvalue needed for this to work. Please install it.",
+                      call. = FALSE)
+                      }
+        fdr.adj<-try(qvalue::qvalue(ob$P.value),silent=TRUE)
          if(class(fdr.adj)=="try-error") {
-          fdr.adj <- try(qvalue(ob$P.value, pi0.method = "bootstrap"),silent=TRUE)
+          fdr.adj <- try(qvalue::qvalue(ob$P.value, pi0.method = "bootstrap"),silent=TRUE)
           if(class(fdr.adj)=="try-error") {
          fdr.method="BH"
         }}

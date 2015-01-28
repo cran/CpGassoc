@@ -9,9 +9,13 @@ function(x) {
                   }
             fdr.method<-x$info$FDR.method
             if (fdr.method=="qvalue") {
-              fdr.adj<-try(qvalue(x$results$gc.p.value),silent=TRUE)
-              if(class(fdr.adj)=="try-error") {
-                fdr.adj <- try(qvalue(x$results$gc.p.value, pi0.method = "bootstrap"),silent=TRUE)
+                 if (!requireNamespace("qvalue", quietly = TRUE)) {
+            stop("qvalue needed for this to work. Please install it.",
+                      call. = FALSE)
+                      }                   
+                fdr.adj<-try(qvalue::qvalue(x$results$gc.p.value),silent=TRUE)
+             if(class(fdr.adj)=="try-error") {
+                fdr.adj <- try(qvalue::qvalue(x$results$gc.p.value, pi0.method = "bootstrap"),silent=TRUE)
                 if(class(fdr.adj)=="try-error") {
                   fdr.method="BH"
                 }}}

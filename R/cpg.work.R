@@ -301,11 +301,14 @@ else {
 
 if (fdr & fdr.method=="qvalue") {
   FDR<-matrix(NA,beta.col)
-  library(qvalue)
+  if (!requireNamespace("qvalue", quietly = TRUE)) {
+       stop("qvalue needed for this to work. Please install it.",
+                      call. = FALSE)
+            }
   holder<-which(!is.na(test.stat[,2]) | !is.nan(test.stat[,2]))
-  qv<-try(qvalue(test.stat[holder,2]),silent=TRUE)
+  qv<-try(qvalue::qvalue(test.stat[holder,2]),silent=TRUE)
   if(class(qv)=="try-error") {
-    qv <- try(qvalue(test.stat[holder,2], pi0.method = "bootstrap"),silent=TRUE)
+    qv <- try(qvalue::qvalue(test.stat[holder,2], pi0.method = "bootstrap"),silent=TRUE)
     if(class(qv)=="try-error") {
       fdr<-FALSE
       warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg \n")

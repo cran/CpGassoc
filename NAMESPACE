@@ -1,5 +1,6 @@
 exportPattern("^[[:alpha:]]+")
 export(cpg.assoc,cpg.perm,cpg.combine,cpg.work,manhattan,design,cpg.everything)
+import(nlme)
 S3method(print, cpg)
 S3method(summary, cpg)
 S3method(plot,cpg)

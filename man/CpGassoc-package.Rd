@@ -3,13 +3,13 @@
 \alias{CpGassoc}
 \docType{package}
 \title{
-Association between Methylation and a phenotype of interest
+Association Between Methylation and a Phenotype of Interest 
 }
 \description{
-CpGassoc is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, 
+Is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, 
 adjusting for any relevant covariates. The package can perform standard analyses of large datasets very quickly with no 
 need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. 
-CpGassoc also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, 
+Also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, 
 and scatterplots for individual CpG sites.
 
 There is a tutorial for CpGassoc available at the website <genetics.emory.edu/conneely/>
@@ -19,8 +19,8 @@ There is a tutorial for CpGassoc available at the website <genetics.emory.edu/co
 Package: CpGassoc
 Type: Package
 Title: Association between Methylation and a phenotype of interest
-Version: 2.11
-Date: 2014-1-2
+Version: 2.50
+Date: 2015-1-24
 Author: Barfield, R., Conneely, K., Kilaru,V
 Maintainer: R Barfield <rbarfield01@fas.harvard.edu>
 Description: CpGassoc is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, adjusting for any relevant covariates. The package can perform standard analyses of large datasets very quickly with no need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. CpGassoc also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, and scatterplots for individual CpG sites.
