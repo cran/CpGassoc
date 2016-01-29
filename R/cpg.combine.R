@@ -68,10 +68,10 @@ if(fdr.method=="qvalue")  {
             stop("qvalue needed for this to work. Please install it.",
                       call. = FALSE)
             }
-qv<-try(qvalue::qvalue(test.stat[holder,3]),silent=TRUE)
-if(length(qv)!=5) {
-    qv <- try(qvalue::qvalue(test.stat[holder,3], pi0.method = "bootstrap"),silent=TRUE)
-    if(length(qv)!=5) {
+qv<-tryCatch(qvalue::qvalue(test.stat[holder,3]), error = function(e) NULL)
+if(is.null(qv)) {
+    qv <- tryCatch(qvalue::qvalue(test.stat[holder,3], pi0.method = "bootstrap"), error = function(e) NULL)
+    if(is.null(qv)) {
       fdr<-FALSE
       warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg\n")
       fdr.method="BH"

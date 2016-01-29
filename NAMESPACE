@@ -1,6 +1,14 @@
 exportPattern("^[[:alpha:]]+")
 export(cpg.assoc,cpg.perm,cpg.combine,cpg.work,manhattan,design,cpg.everything)
 import(nlme)
+importFrom("grDevices", "dev.copy2pdf", "dev.off", "pdf", "postscript")
+importFrom("graphics", "abline", "axis", "boxplot", "legend", "par",
+             "plot", "points", "text")
+importFrom("methods", "is")
+importFrom("stats", "anova", "aov", "coef", "df", "formula", "lm",
+             "median", "model.matrix", "na.omit", "p.adjust", "pf", "pt",
+             "qbeta", "qchisq", "qqplot", "qt", "quantile")
+importFrom("utils", "memory.limit", "object.size", "tail")
 S3method(print, cpg)
 S3method(summary, cpg)
 S3method(plot,cpg)
@@ -18,4 +26,5 @@ S3method(cpg.everything,complex)
 S3method(cpg.everything,numeric)
 S3method(print,cpg.gc)
 S3method(print,cpg.perm.gc)
+
 

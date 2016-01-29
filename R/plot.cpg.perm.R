@@ -42,11 +42,11 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
             stop("qvalue needed for this to work. Please install it.",
                       call. = FALSE)
                       }
-        fdr.adj<-try(qvalue::qvalue(ob$P.value),silent=TRUE)
-         if(class(fdr.adj)=="try-error") {
-          fdr.adj <- try(qvalue::qvalue(ob$P.value, pi0.method = "bootstrap"),silent=TRUE)
-          if(class(fdr.adj)=="try-error") {
-         fdr.method="BH"
+        fdr.adj<-tryCatch(qvalue::qvalue(ob$P.value), error = function(e) NULL)
+         if(is.null(fdr.adj)) {
+          fdr.adj <- tryCatch(qvalue::qvalue(ob$P.value, pi0.method = "bootstrap"), error = function(e) NULL)
+          if(is.null(fdr.adj)) {
+            fdr.method="BH"
         }}
 
           }

@@ -159,11 +159,12 @@ else {
   non.m.beta<-as.matrix(beta.values[,nonmissing])
   if(callarge) gc()
 
-  beta<-try(solve(t(f.design) %*% f.design)%*% t(f.design) %*% non.m.beta,silent=TRUE)      
+  beta<-tryCatch(solve(t(f.design) %*% f.design)%*% t(f.design) %*% non.m.beta,
+                 error = function(e) NULL)
   dfl<-list(df=n-ncol(f.design),df0=n-ncol(r.design))
   df.gc[nonmissing,2]<-dfl$df
 
-  if(class(beta)!="try-error") {
+  if(!is.null(beta)) {
   
     ressq<-(non.m.beta-f.design %*% beta)^2
     ssef<-t(ressq)%*% matrix(1,dim(ressq)[1],1)
@@ -181,10 +182,10 @@ else {
    
   test.stat[which(test.stat[,1]<0 & test.stat[,1] > -.001),1]<-0
      }
-  if(class(beta)== "try-error") {
+  if(is.null(beta)) {
 
      if(!levin) {
-        mono.lm2<-try(lm(non.m.beta~f.design[,-1]),silent=T)
+        mono.lm2<-tryCatch(lm(non.m.beta~f.design[,-1]), error = function(e) NULL)
         mono.results<-cpgassocsummary(mono.lm2)
         test.stat[nonmissing,1:2]<-mono.results[,c(1,3)]
         stderror[nonmissing,]<-mono.results[,2]
@@ -221,9 +222,9 @@ else {
         miss.check<-table(indep[!is.na(beta.values[,i])])
         miss.check<-ifelse(sum(miss.check!=0)>1,1,0)
         if(!levin) {
-          temp<-try(summary(lm(beta.values[,i]~f.design[,-1],x=TRUE)),silent=T)
+          temp<-tryCatch(summary(lm(beta.values[,i]~f.design[,-1],x=TRUE)), error = function(e) NULL)
           
-          if(class(temp)=="try-error" | miss.check==0)    {
+          if(is.null(temp) | miss.check==0)    {
             stderror[i,]<-test.stat[i,1:2]<-df.gc[i,1:2]<-e.s[1,]<-NA
 
             }
@@ -252,8 +253,8 @@ else {
             }
          else{ 
    
-           temp <- try(as.matrix(anova(lm(beta.values[,i]~r.design+i.p))),silent=T)
-        if(class(temp)=="try-error" | miss.check==0) {
+           temp <- tryCatch(as.matrix(anova(lm(beta.values[,i]~r.design+i.p))), error = function(e) NULL)
+        if(is.null(temp) | miss.check==0) {
             test.stat[i,1:2]<-NA
             }
           else{
@@ -265,7 +266,7 @@ else {
 
         }
  
-  if(class(beta)!="try-error") {
+  if(!is.null(beta)) {
 
   if(!levin) {
     test.stat[nonmissing,1]<-sqrt(test.stat[nonmissing,1])*sign(beta[2,])
@@ -306,10 +307,10 @@ if (fdr & fdr.method=="qvalue") {
                       call. = FALSE)
             }
   holder<-which(!is.na(test.stat[,2]) | !is.nan(test.stat[,2]))
-  qv<-try(qvalue::qvalue(test.stat[holder,2]),silent=TRUE)
-  if(class(qv)=="try-error") {
-    qv <- try(qvalue::qvalue(test.stat[holder,2], pi0.method = "bootstrap"),silent=TRUE)
-    if(class(qv)=="try-error") {
+  qv<-tryCatch(qvalue::qvalue(test.stat[holder,2]), error = function(e) NULL)
+  if(is.null(qv)) {
+    qv <- tryCatch(qvalue::qvalue(test.stat[holder,2], pi0.method = "bootstrap"), error = function(e) NULL)
+    if(is.null(qv)) {
       fdr<-FALSE
       warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg \n")
       fdr.method="BH"
@@ -321,8 +322,13 @@ if (fdr & fdr.method=="qvalue") {
       }}
 
 if(!fdr | fdr.method!="qvalue") {
-     test.stat<-cbind(test.stat,p.adjust(test.stat[,2],fdr.method))
-    }
+        if(fdr.method=="qvalue"){
+                 test.stat<-cbind(test.stat,p.adjust(test.stat[,2],"BH"))
+              }
+        if(fdr.method!="qvalue"){
+                 test.stat<-cbind(test.stat,p.adjust(test.stat[,2],fdr.method))
+              }
+        }
 if(beta.col==1) {callarge<-FALSE}
 
 if(is.null(dimnames(beta.values))& !callarge & beta.col>1) {colnames(beta.values)<-paste("X",1:beta.col,sep="") }

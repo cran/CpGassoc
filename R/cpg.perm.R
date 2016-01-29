@@ -126,11 +126,12 @@ for(i in 1:nperm) {
       }
   Permutation[i,1:3] <- c(answers$info$Min.P.Observed,nrow(answers$Holm.sig),nrow(answers$FDR.sig))
   if (fdr.method=="qvalue") {
-      fdr.adj<-try(qvalue::qvalue(answers$results$gc.p.value),silent=TRUE)
-        if(class(fdr.adj)=="try-error") {
-          fdr.adj <- try(qvalue::qvalue(answers$results$gc.p.value, pi0.method = "bootstrap"),silent=TRUE)
-          if(class(fdr.adj)=="try-error") {
-         fdr.method="BH"
+      fdr.adj<-tryCatch(qvalue::qvalue(answers$results$gc.p.value), error = function(e) NULL)
+        if(is.null(fdr.adj)) {
+          fdr.adj <- tryCatch(qvalue::qvalue(answers$results$gc.p.value, pi0.method = "bootstrap"), 
+                              error = function(e) NULL)
+          if(is.null(fdr.adj)) {
+              fdr.method="BH"
         }}}
   if(fdr.method!="qvalue") {
           fdr.adj<-p.adjust(answers$results$gc.p.value,fdr.method)
