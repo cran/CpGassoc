@@ -167,13 +167,13 @@ else {
   if(!is.null(beta)) {
   
     ressq<-(non.m.beta-f.design %*% beta)^2
-    ssef<-t(ressq)%*% matrix(1,dim(ressq)[1],1)
+    ssef<-colSums(ressq)
     if(callarge) {
         rm(ressq)
         gc()}
     beta0<-solve(t(r.design) %*% r.design)%*% t(r.design) %*% non.m.beta
     r.ressq<-(non.m.beta-r.design %*% beta0)^2
-    sser<-t(r.ressq)%*% matrix(1,dim(r.ressq)[1],1)   
+    sser<-colSums(r.ressq)
     test.stat[nonmissing,1]<-(sser-ssef)/ssef*(dfl$df/(dfl$df0-dfl$df))
 
     test.stat[nonmissing,2]<-pf(test.stat[nonmissing,1],df1=(dfl$df0-dfl$df),df2=dfl$df,lower.tail=FALSE)

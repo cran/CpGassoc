@@ -1,4 +1,4 @@
-67c01b6b3fa1145c8e6a5756620a28a4 *DESCRIPTION
+3bc36b98582ba79088796a7b74eba927 *DESCRIPTION
 cd8cdfd0188e761adadb1efbcf9e6123 *NAMESPACE
 dea7b9d0f5c3483ae75e96e7d4f5cc93 *R/CpGassoc-internal.R
 2e757e77c865717b324a0c3d50746718 *R/cpg.GC.R
@@ -13,7 +13,7 @@ dea7b9d0f5c3483ae75e96e7d4f5cc93 *R/CpGassoc-internal.R
 dc06a3951043ae0201431b9d803838b0 *R/cpg.length.R
 a23622fec8dc029801931704c9e99ad9 *R/cpg.perm.R
 dbe74ebe5962d514ec36322ed3c0ccbf *R/cpg.qc.R
-8f6e8376f9a6c5fefd190b24b65c32df *R/cpg.work.R
+4ea024dc6f4b03174f82b74b85bab54f *R/cpg.work.R
 78bdd37aa858d377831cb0e5cf86eb90 *R/cpgassocsummary.R
 2f0ec374e20fc8689dfe2a39bbc8f524 *R/design.NULL.R
 e27755d52467c87bb01bd6aaf771132a *R/design.R
@@ -32,15 +32,15 @@ a09ecd3dec56ac1868479d03989513a2 *R/scatterplot.R
 3a739163e3c29a5ea0f8cee81230b73b *R/sort.cpg.perm.R
 221cbd150c3efc1451eb1018aaf57f2c *R/summary.cpg.R
 705d5f6abbf43272073c373f9f842596 *R/summary.cpg.perm.R
-9d7ecb6e7c4db080dd7d371cbdaf5409 *build/vignette.rds
-55623fb1a8d90f01d5abdda1bef24078 *data/annotation.rda
+ac23c95d8ed6d572bdc817d804565267 *build/vignette.rds
+a5e40416a38edb8a611c7c87519dc009 *data/annotation.rda
 dae7b5b037e64d4a49e6e08c3f808484 *data/datalist
-1c0bac1ed14e80d0f832e0c70af87f31 *data/samplecpg.rda
-8ff6b61865cacf008eeb89d943583903 *data/samplepheno.rda
+0d43e3cab9278b86dac99c5b53b736ca *data/samplecpg.rda
+d0229e6ea2044b5a56609a19039715e4 *data/samplepheno.rda
 6f5ac350f240a73216bb71b97239d4ad *inst/doc/CpGassoc.R
-fbf632376fb1abcb87da69a0581314a6 *inst/doc/CpGassoc.Rnw
-fc84c45ed87f8447713b3b2340d47649 *inst/doc/CpGassoc.pdf
-5a0d9f256467174de305530ea3247353 *man/CpGassoc-package.Rd
+128b21cde7275269a4bc95acfd3d3383 *inst/doc/CpGassoc.Rnw
+d163bfd09fca230aaad123c001be6877 *inst/doc/CpGassoc.pdf
+f4033cc1a144739d94aee4732b2389fb *man/CpGassoc-package.Rd
 d8013137af16acffe23bfdb7bfb122e8 *man/Sample.data.Rd
 909b07ea056de23e4de725125090e0ad *man/cpg.GC.Rd
 61bd5ad19cf7a23d8d9796328e5e71b2 *man/cpg.Rd
@@ -56,4 +56,4 @@ d487083232694d297f33959d99ffd80d *man/cpg.perm.object.Rd
 da3b37cc79a9995f73e17957306bae5e *man/manhattan.reflect.Rd
 e4233513e0b4feb9e656ccc14b916461 *man/other.functions.Rd
 bf7f9811b3581a703272caf817366c06 *man/scatterplot.Rd
-fbf632376fb1abcb87da69a0581314a6 *vignettes/CpGassoc.Rnw
+128b21cde7275269a4bc95acfd3d3383 *vignettes/CpGassoc.Rnw

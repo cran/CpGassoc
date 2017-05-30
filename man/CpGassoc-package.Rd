@@ -19,10 +19,10 @@ There is a tutorial for CpGassoc available at the website <genetics.emory.edu/co
 Package: CpGassoc
 Type: Package
 Title: Association between Methylation and a phenotype of interest
-Version: 2.55
-Date: 2016-1-28
+Version: 2.60
+Date: 2017-05-30
 Author: Barfield, R., Conneely, K., Kilaru,V
-Maintainer: R Barfield <rbarfield01@fas.harvard.edu>
+Maintainer: R Barfield <barfieldrichard8@gmail.com>
 Description: CpGassoc is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, adjusting for any relevant covariates. The package can perform standard analyses of large datasets very quickly with no need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. CpGassoc also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, and scatterplots for individual CpG sites.
 Depends:nlme,methods
 Suggests:qvalue
