@@ -18,6 +18,7 @@
 \SweaveOpts{keep.source=TRUE,debug=TRUE,engine=R}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \fontsize{4mm}{5mm}\selectfont
 \begin{center}
 \Large CpGassoc\\
@@ -61,7 +62,7 @@ fdr.cutoff & & The desired FDR threshold. The default setting is .05. The set of
 
 large.data & & Logical. Enables analyses of large datasets. When \Rfunction{large.data=TRUE}, \Rfunction{cpg.assoc} avoids memory problems by performing the analysis in chunks. \\\\
 
-fdr.method & & Character. Method used to calculate False Discovery Rate. Choices include any of the methods available in \Rfunction{p.adjust()} or "qvalue" for John Storey's qvalue method (requires that \Rpackage{qvalue} package is installed). The default method is "BH" for the Benjamini and Hochberg method.\\\\
+fdr.method & & Character. Method used to calculate False Discovery Rate. Choices include any of the methods available in \Rfunction{p.adjust()}. The default method is "BH" for the Benjamini and Hochberg method.\\\\
 
 logitperm & & Logical. For internal use only.\\\\
 
@@ -243,7 +244,7 @@ random & & Logical. If \texttt{TRUE}, the \texttt{chip.id} will be processed as 
 
 fdr.cutoff & & The threshold at which to compare the FDR values. The default setting is .05. Any FDR values less than .05 will be considered significant.\\\\
 
-fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \texttt{p.adjust} or "qvalue" for John Storey's qvalue method (required to have \Rpackage{qvalue} package installed). The default method is "BH" for the Benjamini and Hochberg method. \\\\
+fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \texttt{p.adjust}. The default method is "BH" for the Benjamini and Hochberg method. \\\\
 
 large.data & & Logical.  Enables analyses of large datasets.  When \texttt{large.data=TRUE}, \Rfunction{cpg.assoc} avoids memory problems by performing the analysis in chunks. \\\\
 
@@ -459,7 +460,7 @@ fdr.cutoff & & The threshold at which to compare the FDR values. The default set
 
 callarge & & Logical. Used by \Rfunction{cpg.assoc} when it calls \Rfunction{cpg.work}. If \texttt{TRUE} it means that beta.values is actually split up from a larger data set and that \Rfunction{memory.limit} may be a problem. This tells \Rfunction{cpg.work} to perform more \Rfunction{rm()} and \Rfunction{gc()} to clear up space.\\\\
 
-fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \Rfunction{p.adjust} or \Rpackage{qvalue} for John Storey's qvalue method (required to have \Rpackage{qvalue} package installed). The default method is "BH" for the Benjamini and Hochberg method.\\\\
+fdr.method & & Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \Rfunction{p.adjust}. The default method is "BH" for the Benjamini and Hochberg method.\\\\
 
 logitperm & & Passes from \Rfunction{cpg.perm} when permutation test is performed. Stops from future checks involving the logistic transformation.\\\\
 
@@ -877,7 +878,7 @@ scatterplot & & \itshape Plot beta values of individual CpG sites against the in
 \line(1,0){400}\\
 
 \subsection*{\small Usage}
-scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,main.title=NULL, ...)
+scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,user.indep=NULL,main.title=NULL, ...)
 
 
 
@@ -900,6 +901,8 @@ eps.size & & Vector indicating the size of .eps file (if creating one). Correpon
 popup.pdf & & \texttt{TRUE} or \texttt{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a cluster-like environment, best to leave \texttt{FALSE}.\\\\
 
 beta.values & & If the object has been renamed (i.e. \texttt{x$info$betainfo} is no longer in \texttt{ls(.GlobalEnv)}) then specify the new object here.\\\\
+
+user.indep & & Default \texttt{NULL}. If return.data=F in run, scatterplot will not work. Pass in samplepheno here. Must be in same order as samplecpg.\\\\
 
 main.title & & Main title to be put on the graph. If \texttt{NULL} one based on the analysis will be used\\\\
 
@@ -931,13 +934,13 @@ library(CpGassoc)
 ##This will involve partitioning up the data and performing more gc() to clear up space
 test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 ##Using rank, will plot the top three sites in order of significance:
-scatterplot(test,c(1:3))
+scatterplot(test,cpg.rank=c(1:3),user.indep=samplepheno$weight)
 ##Using name, specify three sites:
-scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"))
+scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"),user.indep=samplepheno$weight)
 
 ##Plotting something that is categorical in nature:
 test2<-cpg.assoc(samplecpg,factor(samplepheno$Disease),large.data=FALSE)
-scatterplot(test2,c(2))
+scatterplot(test2,c(2),user.indep=as.factor(samplepheno$Disease))
 @
 \end{figure}
 

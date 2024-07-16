@@ -38,7 +38,7 @@ Returns a list containing the full and reduced design matrices.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 \note{
 The \code{design} function  is designed to be used exclusively by the \code{cpg.assoc} and \code{cpg.perm} functions.
@@ -70,5 +70,3 @@ test2<-design(NULL,samplepheno$SBP,NULL,FALSE)
 dim(test2$full)
 dim(test2$reduced)
 }
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

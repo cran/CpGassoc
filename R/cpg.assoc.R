@@ -1,9 +1,15 @@
 cpg.assoc <-
 function(beta.val,indep,covariates=NULL,data=NULL,logit.transform=FALSE,
-              chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,large.data=TRUE,fdr.method="BH",logitperm=FALSE)  {
+              chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,large.data=FALSE,fdr.method="BH",logitperm=FALSE,
+         return.data=FALSE)  {
 p.name.holder<-list(deparse(substitute(beta.val)),deparse(substitute(chip.id)),cpg.everything(deparse(substitute(indep))))
 beta.val<-as.matrix(beta.val)
 gc()
+
+if(fdr.method=="qvalue") {
+  warnings("\nfdr.method=qvalue is no longer supported. Changed to BH.\n")
+  fdr.method="BH"
+}
 
 if(is.null(ncol(beta.val))) {beta.val<-as.matrix(beta.val)}
 if(ncol(beta.val)==1) beta.val<-t(beta.val)
@@ -11,7 +17,7 @@ if(ncol(beta.val)==1) beta.val<-t(beta.val)
 beta.row<-nrow(beta.val)
 beta.col<-ncol(beta.val)
 
-if(class(covariates)=="formula") {
+if(is(covariates,"formula")){
   variables<-gsub("[[:blank:]]","",strsplit(as.character(covariates)[2],"+",fixed=TRUE)[[1]])
   covariates<-data.frame(eval(parse(text=variables[1])))
   names(covariates)=variables[1]
@@ -32,7 +38,8 @@ gc()
 
 if(!large.data) {
     results<-cpg.work(beta.val,indep,covariates,data,logit.transform,
-                      chip.id,subset,random,fdr.cutoff,callarge=FALSE,fdr.method,logitperm)
+                      chip.id,subset,random,fdr.cutoff,callarge=FALSE,
+                      fdr.method,logitperm,return.data=return.data)
     }
               
            
@@ -97,28 +104,39 @@ else {
         gc()
         if(j<i) {
            allresults[[j]]<-cpg.work(beta.val[1:div,],indep,covariates,data,logit.transform,
-                                    chip.id,subset,random,fdr.cutoff,callarge=TRUE,fdr.method,logitperm,big.split=big.split)
+                                    chip.id,subset,random,fdr.cutoff,callarge=TRUE,
+                                    fdr.method,logitperm,big.split=big.split,
+                                    return.data=return.data)
            gc()
            beta.val<-beta.val[(div+1):nrow(beta.val),]
            gc()
               }
         else {
            allresults[[j]]<-cpg.work(beta.val,indep,covariates,data,logit.transform,
-                                    chip.id,subset,random,fdr.cutoff,callarge=TRUE,fdr.method,logitperm,big.split=big.split)
+                                    chip.id,subset,random,fdr.cutoff,callarge=TRUE,
+                                    fdr.method,logitperm,big.split=big.split,
+                                    return.data=return.data)
            gc()
               }
              }
 
-  results<-cpg.combine(allresults,fdr.method)
+  results<-cpg.combine(allresults,fdr.method,return.data=return.data)
 
   rm(allresults,fdr.method)
   gc()
       }
   rm(beta.val)
   gc()
+  
   results$info$betainfo<-p.name.holder[[1]]
   results$info$Phenotype<-p.name.holder[[3]]
   results$info$chipinfo<- p.name.holder[[2]]
-  results   
+  
+  if(!return.data){
+    results$indep<-NULL
+    results$covariates<-NULL
+    results$chip<-NULL
+  }
+  return(results)
        
   }

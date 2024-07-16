@@ -35,14 +35,14 @@ result in publication quality editable postscript files that can be opened by Ad
 cluster-like environment, best to leave \code{FALSE}.
 }
   \item{main.title}{
-Main title to be put on the graph. If \code{NULL} one based on the analysis will be used
+Main title to be put on the graph. If \code{NULL} one based on the analysis will be used.
 }
   \item{eps.size}{
-Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the
+Vector indicating the size of .eps file (if creating one). Corresponds to the options horizontal and height in the
 \code{postscript} function.
 }
   \item{tplot}{
-Logical. If \code{TRUE}, ordered t-statistics will be plotted against their expected quanties. If \code{FALSE} (default), -log(p) will be plotted. If indep is a class variable this option will be
+Logical. If \code{TRUE}, ordered t-statistics will be plotted against their expected quantities. If \code{FALSE} (default), -log(p) will be plotted. If indep is a class variable this option will be
 ignored.
 }
   \item{perm.ci}{
@@ -76,7 +76,7 @@ Methods and extra functions for class \code{"cpg.perm"}.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 \note{
 Empirical confidence intervals will be computed only if there are a hundred or more permutations. Otherwise the theoretical confidence intervals will be plotted.
@@ -92,10 +92,7 @@ Empirical confidence intervals will be computed only if there are a hundred or m
 }
 \examples{
 data(samplecpg,samplepheno,package="CpGassoc")
-##We will do the analysis on a subset to save time
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
-###The default option is true.
-##This will involve partitioning up the data and performing more gc() to clear up space
+
 #The qq plot:
 Testperm<-cpg.perm(samplecpg[1:300,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)
 plot(Testperm)
@@ -115,7 +112,3 @@ head(Testperm$results)
 
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

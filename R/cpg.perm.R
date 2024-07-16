@@ -1,13 +1,22 @@
 cpg.perm <-
 function(beta.values,indep,covariates=NULL,nperm,data=NULL,seed=NULL,
-     logit.transform=FALSE,chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,fdr.method="BH",large.data=TRUE) {
+     logit.transform=FALSE,chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,fdr.method="BH",large.data=FALSE,
+     return.data=FALSE) {
+
+  
+  
+  if(fdr.method=="qvalue") {
+    warnings("\nfdr.method=qvalue is no longer supported. Changed to BH.\n")
+    fdr.method="BH"
+  }
+  
 
 name.holder<-list(deparse(substitute(beta.values)),deparse(substitute(chip.id)),cpg.everything(deparse(substitute(indep))))
 
 if(is.null(ncol(beta.values))) {beta.values<-as.matrix(beta.values)}
 beta.row<-nrow(beta.values)
 beta.col<-ncol(beta.values)
-if(class(covariates)=="formula") {
+if(is(covariates,"formula")){
   variables<-gsub("[[:blank:]]","",strsplit(as.character(covariates)[2],"+",fixed=TRUE)[[1]])
   covariates<-data.frame(eval(parse(text=variables[1])))
   names(covariates)=variables[1]
@@ -43,16 +52,16 @@ if(is.matrix(covariates)| length(covariates)==length(indep) ) {
 levin<-is.factor(indep)
 Problems<-which(beta.values<0 |beta.values >1)
 
-ob.data<-cpg.assoc(beta.values,indep,covariates,data,logit.transform,chip.id,subset,random,fdr.cutoff,fdr.method=fdr.method,large.data=large.data)
+ob.data<-cpg.assoc(beta.values,indep,covariates,data,
+                   logit.transform,chip.id,subset,random,fdr.cutoff,
+                   fdr.method=fdr.method,large.data=large.data,
+                   return.data=return.data)
 ob.data$info$Phenotype<-name.holder[[3]]
 Min.P.Observed<-ob.data$info[1,1]
 
 
 fdr <- beta.row>= 100
-if(fdr.method=="qvalue" & !fdr) {
-  fdr.method="BH"
-  warning("\nCan not perform qvalue method with less than a 100 CpG sites\n")
-  }
+
 if(nperm>=100) {
   perm.pval<-matrix(NA,beta.row,nperm)
   if(!levin) {perm.tstat<-matrix(NA,beta.row,nperm)}
@@ -112,8 +121,10 @@ for(i in 1:nperm) {
         }
   Perm.var <- sample(indep);
   
-  answers<-cpg.assoc(beta.values,Perm.var,covariates,data,logit.transform=FALSE
-                ,chip.id,subset,random,fdr.cutoff,fdr.method=fdr.method,logitperm=TRUE,large.data=large.data)
+  answers<-cpg.assoc(beta.values,Perm.var,covariates,data,
+                     logit.transform=FALSE,chip.id,subset,random,fdr.cutoff,
+                fdr.method=fdr.method,logitperm=TRUE,large.data=large.data,
+                return.data=return.data)
     if(random) {
       problems<-sum(is.na(answers$results$P.value))
       if (problems>0){
@@ -125,20 +136,10 @@ for(i in 1:nperm) {
     if(!levin) {perm.tstat[,i]<-answers$results$T.statistic}
       }
   Permutation[i,1:3] <- c(answers$info$Min.P.Observed,nrow(answers$Holm.sig),nrow(answers$FDR.sig))
-  if (fdr.method=="qvalue") {
-      fdr.adj<-tryCatch(qvalue::qvalue(answers$results$gc.p.value), error = function(e) NULL)
-        if(is.null(fdr.adj)) {
-          fdr.adj <- tryCatch(qvalue::qvalue(answers$results$gc.p.value, pi0.method = "bootstrap"), 
-                              error = function(e) NULL)
-          if(is.null(fdr.adj)) {
-              fdr.method="BH"
-        }}}
-  if(fdr.method!="qvalue") {
+  
+  
           fdr.adj<-p.adjust(answers$results$gc.p.value,fdr.method)
-          }
-  if(fdr.method=="qvalue"){
-          fdr.adj<-fdr.adj$qvalue
-  }
+          
   gc.Permutation[i,1:3]<-c(min(answers$results$gc.p.value,na.rm=TRUE),
                             sum(p.adjust(answers$results$gc.p.value,"holm")<.05),
                             sum(fdr.adj<.05))
@@ -172,5 +173,11 @@ rm(Permutation,ob.data,p.value.matrix)
 gc()
 
 class(perm.data)<-"cpg.perm"
+if(!return.data){
+  perm.data$indep<-NULL
+  perm.data$covariates<-NULL
+  perm.data$chip<-NULL
+}
+
 perm.data
      }

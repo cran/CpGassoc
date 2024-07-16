@@ -5,12 +5,12 @@
 Plot beta values of individual CpG sites against the independent variable.
 }
 \description{
-Plot beta values of individual CpG sites against the independent variable. Can create scatterplots and boxplots. If scatterplots the intercept will be adjusted
-for any covariates that were included in the model.
+Plot beta values of individual CpG sites against the independent variable. Can create scatterplots and boxplots. If scatterplots the intercept will be adjusted for any covariates that were included in the model. Only available if return.data was set to T. 
 }
 \usage{
 scatterplot(x, cpg.rank = NULL, cpg.name = NULL, save.plot = NULL, file.type="pdf", 
-eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,main.title=NULL, ...)
+eps.size = c(5, 5), popup.pdf = FALSE, beta.values = NULL,
+user.indep=NULL,main.title=NULL, ...)
 }
 
 \arguments{
@@ -32,7 +32,7 @@ Type of file to be saved. Can either be \code{"pdf"} or \code{"eps"}. Selecting 
 result in publication quality editable postscript files that can be opened by Adobe Illustrator or Photoshop.
   }
   \item{eps.size}{
-Vector indicating the size of .eps file (if creating one). Correponds to horrizontal and height.
+Vector indicating the size of .eps file (if creating one). Corresponds to horizontal and height.
 }
   \item{popup.pdf}{
 \code{TRUE} or \code{FALSE}. If creating a pdf file, this indicates if the plot should appear in a popup window as well. If running in a 
@@ -41,8 +41,11 @@ cluster-like environment, best to leave \code{FALSE}.
   \item{beta.values}{
 If the object has been renamed (i.e. \code{x$info$betainfo} is no longer in \code{ls(.GlobalEnv)}) then specify the new object here.
 }
+  \item{user.indep}{
+Default \code{NULL}. If return.data=F in run, scatterplot will not work. Pass in samplepheno here. Must be in same order as samplecpg.
+}
   \item{main.title}{
-Main title to be put on the graph. If \code{NULL} one based on the analysis will be used
+Main title to be put on the graph. If \code{NULL} one based on the analysis will be used.
 }
   \item{\dots}{
 Arguments to be passed to methods, such as graphical parameters.
@@ -53,7 +56,7 @@ An unlimited number of CpG sites can be selected for plotting by specifying eith
 }
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 
@@ -69,19 +72,15 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 \examples{
 #Load the data:
 data(samplecpg,samplepheno,package="CpGassoc")
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
-###The default option is true.
-##This will involve partitioning up the data and performing more gc() to clear up space
-test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
+
+test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE,return.data=TRUE)
 ##Using rank, will plot the top three sites in order of significance:
-scatterplot(test,c(1:3))
+scatterplot(test,c(1:3),user.indep=sampleoheno$weight)
 ##Using name, specify three sites:
 scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"))
 
 ##Plotting something that is categorical in nature:
-test2<-cpg.assoc(samplecpg[1:200,],factor(samplepheno$Disease),large.data=FALSE)
-scatterplot(test2,c(2),beta.values=samplecpg[1:200,])
+test2<-cpg.assoc(samplecpg[1:200,],factor(samplepheno$Disease),large.data=FALSE,return.data=TRUE)
+scatterplot(test2,c(2),beta.values=samplecpg[1:200,],
+user.indep=sampleoheno$weight)
 }
-
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -7,7 +7,7 @@
 Sample data from \pkg{CpGassoc}
 }
 \description{
-  \itemize{
+  \describe{
   \item{samplecpg}{Matrix containing sample (fake) methylation data for 258 individuals over 1228 CpG sites}
   \item{samplepheno}{Matrix with phenotype info for the 258 individuals}
   \item{annotation}{Matrix with annotation information for the 1228 CpG sites}
@@ -15,7 +15,7 @@ Sample data from \pkg{CpGassoc}
 }
 \usage{data(samplecpg)}
 \format{
- \itemize{
+ \describe{
   \item{samplecpg}{Matrix, dimensions 1228 x 258}
   \item{samplepheno}{Matrix, dimensions 258 x 6. Phenotype info on \code{"Dose"}, \code{"SBP"}, \code{"Distance"}, \code{"weight"}, \code{"Disease"}, and \code{"chip"}}
   \item{annotation}{Matrix, dimensions 1228 x 3. Header names are \code{"TargetID"}, \code{"CHR"}, and \code{"MAPINFO"}}

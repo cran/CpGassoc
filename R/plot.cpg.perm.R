@@ -37,22 +37,9 @@ function(x,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,main.title=NULL,eps.si
         ob$P.value<-ob$gc.p.value
         fdr.method<-x$info$FDR.method
         holm.adj<-p.adjust(ob$P.value,"holm")
-     if (fdr.method=="qvalue") {
-         if (!requireNamespace("qvalue", quietly = TRUE)) {
-            stop("qvalue needed for this to work. Please install it.",
-                      call. = FALSE)
-                      }
-        fdr.adj<-tryCatch(qvalue::qvalue(ob$P.value), error = function(e) NULL)
-         if(is.null(fdr.adj)) {
-          fdr.adj <- tryCatch(qvalue::qvalue(ob$P.value, pi0.method = "bootstrap"), error = function(e) NULL)
-          if(is.null(fdr.adj)) {
-            fdr.method="BH"
-        }}
-
-          }
-    if(fdr.method!="qvalue") {
-          fdr.adj<-p.adjust(ob$P.value,fdr.method)
-          }
+     
+        fdr.adj<-p.adjust(ob$P.value,fdr.method)
+          
     x$FDR.sig<-subset(ob,fdr.adj<.05)
     x$Holm.sig<-subset(ob,holm.adj<.05)
     

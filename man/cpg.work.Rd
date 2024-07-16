@@ -10,7 +10,7 @@ Association Analysis Between Methylation Beta Values and Phenotype of Interest. 
 \usage{
 cpg.work(beta.values, indep, covariates = NULL, data = NULL, logit.transform = FALSE,
 chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, callarge = FALSE,
-fdr.method = "BH", logitperm = FALSE,big.split=FALSE)
+fdr.method = "BH", logitperm = FALSE,big.split=FALSE,return.data=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,7 +29,7 @@ an optional data frame, list or environment (or object coercible by \code{as.dat
 }
   \item{logit.transform}{
 logical. If \code{TRUE}, the logit transform of the beta values log(beta.val/(1-beta.val)) will be used. Any values equal to zero or one will be set to the 
-next smallest or  next largest value respectively; values <0 or >1 will be set to NA.
+next smallest or  next largest value, respectively; values <0 or >1 will be set to NA.
 }
   \item{chip.id}{
 An optional vector containing chip, batch identities, or other categorical factor of interest to the researcher. If specified, chip id will be included as a factor in the model.
@@ -49,14 +49,16 @@ logical. Used by \code{cpg.assoc} when it calls \code{cpg.work}. If \code{TRUE} 
 This tells \code{cpg.work} to perform more \code{rm()} and \code{gc()} to clear up space.
 }
   \item{fdr.method}{
-Character.Method used to calculate False Discovery Rate. Can be any of the methods listed in \code{\link{p.adjust}} or "qvalue" 
-for John Storey's qvalue method (required to have \pkg{qvalue} package installed). The default method is "BH" for the Benjamini & Hochberg method.
+Character.Method used to calculate False Discovery Rate. Can be any of the methods listed in \code{\link{p.adjust}}. The default method is "BH" for the Benjamini & Hochberg method.
 }
   \item{logitperm}{
 Passes from \code{cpg.perm} when permutation test is performed. Stops from future checks involving the logistic transformation.
 }
   \item{big.split}{
 Passes from \code{cpg.assoc}. Internal flag to inform \code{cpg.work} that the large data did not need to be split up.
+}
+  \item{return.data}{
+Logical. cpg.assoc can return dataframes containing the the variable of interest, covariates, and the chip id (if present). Defaults to FALSE. Set to TRUE if plan on using the downstream scatterplot functions).
 }
 }
 \details{
@@ -79,24 +81,24 @@ A data.frame of the sites that were FDR significant by the fdr method.
 A data frame consisting of the minimum P-value observed, the fdr method used, what the phenotype of interest was, and the number of covariates in the model.
   }
   \item{indep}{
-The main phenotype of interest.
+If \code{return.data=T}, the independent variable that was tested for association.
   }
   \item{covariates}{
-If covariates was non \code{NULL}, the covariates will be included.Otherwise will be \code{NULL}.
+If \code{return.data=T}, data.frame or matrix of covariates, if specified (otherwise \code{NULL}).
   }
   \item{chip}{
-If chip.id was non \code{NULL}, the chip will be included. Otherwise will be \code{NULL}.
+If \code{return.data=T}, chip.id vector, if specified (otherwise \code{NULL}).
   }
 
   \item{coefficients}{
-A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. 
+A data frame consisting of the degrees of freedom, and if object is continuous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. 
 The degrees of freedom is used in \code{\link{plot.cpg}} to compute the genomic inflation factors.\cr
  }
 }
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 
@@ -118,7 +120,3 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 ##See the examples listed in cpg.assoc for ways in which to use cpg.work.
 ##Just change the cpg.assoc to cpg.work.
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

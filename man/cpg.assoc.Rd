@@ -5,12 +5,12 @@
 Association Analysis Between Methylation Beta Values and Phenotype of Interest
 }
 \description{
-Association Analysis Between Methylation Beta Values and Phenotype of Interest. For more detail see Tutorial.
+Association Analysis Between Methylation Beta Values and Phenotype of Interest.
 }
 \usage{
 cpg.assoc(beta.val, indep, covariates = NULL, data = NULL, logit.transform = FALSE, 
-chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, large.data = TRUE,
-fdr.method = "BH", logitperm = FALSE)
+chip.id = NULL, subset = NULL, random = FALSE, fdr.cutoff = 0.05, large.data = FALSE,
+fdr.method = "BH", logitperm = FALSE,return.data=FALSE)
 }
 
 \arguments{
@@ -49,14 +49,16 @@ fitted. If \code{FALSE}, \option{chip.id} will be included in the model as an or
 The desired FDR threshold. The default setting is .05. The set of CpG sites with FDR < \option{fdr.cutoff} will be labeled as significant.
 }
   \item{large.data}{
-Logical.  Enables analyses of large datasets.  When \code{large.data=TRUE}, \code{cpg.assoc} avoids memory problems by performing the analysis in chunks. 
+Logical.  Enables analyses of large datasets.  When \code{large.data=TRUE}, \code{cpg.assoc} avoids memory problems by performing the analysis in chunks. Note: this option no longer works within windows systems. Based on reading max memory allowable by the system. Defaults to False. 
 }
   \item{fdr.method}{
-Character. Method used to calculate False Discovery Rate. Choices include any of the methods available in \code{p.adjust()} or
-"qvalue" for John Storey's qvalue method (requires that \pkg{qvalue} package is installed). The default method is "BH" for the Benjamini & Hochberg method.
+Character. Method used to calculate False Discovery Rate. Choices include any of the methods available in \code{p.adjust()}. The default method is "BH" for the Benjamini & Hochberg method.
 }
   \item{logitperm}{
 Logical. For internal use only.
+}
+  \item{return.data}{
+Logical. cpg.assoc can return dataframes containing the the variable of interest, covariates, and the chip id (if present). Defaults to FALSE. Set to TRUE if plan on using the downstream scatterplot functions).
 }
 }
 \details{
@@ -67,7 +69,7 @@ Logical. For internal use only.
 If \code{class(indep)='factor'}, \code{cpg.assoc} will perform an ANOVA test of the variable conditional on the covariates specified. Covariates, if entered, should be in the form of a data 
 frame, matrix, or vector. For example, \code{covariates=data.frame(weight,age,factor(city))}. The data frame can also be specified prior to calling \code{cpg.assoc}.  The covariates 
 should either be vectors or columns of a matrix or data.frame.\cr
-\code{cpg.assoc} is also designed to deal with large data sets. Setting \code{large.data=TRUE} will make \code{cpg.assoc} split up the data to enable efficient analysis of large datasets.
+\code{cpg.assoc} is also designed to deal with large data sets. Setting \code{large.data=TRUE} will make \code{cpg.assoc} split up the data in chunks. Other option is to use cpg.combine and split up oneself. 
 
 }
 \value{
@@ -87,13 +89,13 @@ A data frame consisting of the minimum P-value observed, the FDR method that was
 taken from, the FDR cutoff value and whether a mixed effects analysis was performed.
   }
   \item{indep}{
-The independent variable that was tested for association.
+If \code{return.data=T}, the independent variable that was tested for association.
   }
   \item{covariates}{
-Data.frame or matrix of covariates, if specified (otherwise \code{NULL}).
+If \code{return.data=T}, data.frame or matrix of covariates, if specified (otherwise \code{NULL}).
   }
   \item{chip}{
-chip.id vector, if specified (otherwise \code{NULL}).
+If \code{return.data=T}, chip.id vector, if specified (otherwise \code{NULL}).
   }
   \item{coefficients}{
 A data frame consisting of the degrees of freedom, and if object is continous the intercept effect adjusted for possible covariates in the model, the estimated effect size, and the standard error. 
@@ -104,7 +106,7 @@ The degrees of freedom is used in \code{\link{plot.cpg}} to compute the genomic 
 
 \author{
 Barfield, R.; Conneely, K.; Kilaru,V.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 \seealso{
@@ -122,9 +124,6 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 }
 \examples{
  # Sample output from CpGassoc
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. 
-###The default option is true.
-##This will involve partitioning up the data and performing more gc() to clear up space
 data(samplecpg,samplepheno,package="CpGassoc")
 results<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 results

@@ -1,14 +1,30 @@
 scatterplot <-
-function(x,cpg.rank=NULL,cpg.name=NULL,save.plot=NULL,file.type="pdf",eps.size=c(5,5),popup.pdf=FALSE,beta.values=NULL,main.title=NULL,...)   {
+function(x,cpg.rank=NULL,cpg.name=NULL,save.plot=NULL,
+         file.type="pdf",eps.size=c(5,5),
+         popup.pdf=FALSE,
+         beta.values=NULL,
+         user.indep=NULL,
+         main.title=NULL,...)   {
 
   nam.ind<-x$info$Phenotype
+
   if(!((x$info$betainfo) %in% ls(.GlobalEnv)) & is.null(beta.values)){
      stop("\nbeta values is no longer in the environment. Either provide the new name of the beta values\n object (see help(scatterplot))",
           " or reload the object\n")
       }
+  if(is.null(x$indep)) {
+    if(is.null(user.indep)){
+      stop("No independent variable found in objects. No plots can be made\n")
+    }
+    if(!is.null(user.indep)){
+      x$indep<-user.indep
+      
+    }
+    
+  }
   if(is.null(cpg.rank) & is.null(cpg.name)) {
     stop("No cpg sites given. Please specify what sites you want to plot\n")
-      }
+  }
   if(is.null(beta.values)) {y=eval(parse(text=as.character(x$info$betainfo)))}
   else {y<-beta.values}
   if(!is.null(cpg.rank) & !is.null(cpg.name)) {
@@ -22,11 +38,14 @@ function(x,cpg.rank=NULL,cpg.name=NULL,save.plot=NULL,file.type="pdf",eps.size=c
       save.plot<-paste(save.plot,cpg.rank,sep="_")
          }}
   if(!is.null(cpg.name)) {
-    place<-cpg.name
+    
+    x$results<-subset(x$results,x$results$CPG.Labels %in% cpg.name)
+    place<-x$results$CPG.Labels
+    cpg.name<-place
     if(!is.null(save.plot)) {
       save.plot<-paste(save.plot,cpg.name,sep="_")
-    }}
-
+    }
+    }
 
   holder<-which(x$results[,1] %in% place)
   if(!is.null(x$covariates)) {

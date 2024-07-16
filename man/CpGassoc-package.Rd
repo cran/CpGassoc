@@ -11,21 +11,18 @@ adjusting for any relevant covariates. The package can perform standard analyses
 need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. 
 Also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, 
 and scatterplots for individual CpG sites.
-
-There is a tutorial for CpGassoc available at the website <genetics.emory.edu/conneely/>
 }
 \details{
 \tabular{ll}{
 Package: CpGassoc
 Type: Package
 Title: Association between Methylation and a phenotype of interest
-Version: 2.60
-Date: 2017-05-30
+Version: 2.70
+Date: 2024-07-01
 Author: Barfield, R., Conneely, K., Kilaru,V
 Maintainer: R Barfield <barfieldrichard8@gmail.com>
 Description: CpGassoc is designed to test for association between methylation at CpG sites across the genome and a phenotype of interest, adjusting for any relevant covariates. The package can perform standard analyses of large datasets very quickly with no need to impute the data. It can also handle mixed effects models with chip or batch entering the model as a random intercept. CpGassoc also includes tools to apply quality control filters, perform permutation tests, and create QQ plots, manhattan plots, and scatterplots for individual CpG sites.
 Depends:nlme,methods
-Suggests:qvalue
 License: GPL (>= 2)
 }
 CpGassoc is a suite of R functions designed to perform flexible analyses of methylation array data. 
@@ -35,7 +32,7 @@ continuous or categorical in nature.  \code{cpg.assoc} allows users to set their
 to transform the beta values to log(beta/(1-beta)), and to subset if required.  cpg.assoc can also fit a 
 linear mixed effects model with a single random effect to control for possible technical difference due to 
 batch or chip.  \code{cpg.assoc} uses the Holm method to determine significance. The user can also specify 
-an FDR method to determine significance based on the function  \code{p.adjust} or  \code{qvalue}.  \code{cpg.perm} 
+an FDR method to determine significance based on the function  \code{p.adjust}.  \code{cpg.perm} 
 performs the same tasks as \code{cpg.assoc} followed by a permutation test on the data, repeating the analysis 
 multiple times after randomly permuting the main phenotype of interest. The user can 
 specify the seed and the number of permutations. If over one hundred permutations are performed 
@@ -45,7 +42,7 @@ For more information see \code{\link{plot.cpg.perm}}. For more information on ho
 }
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 
@@ -62,10 +59,8 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 \code{\link{cpg.qc}}
 }
 \examples{
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. 
-###The default option is true
-##This will involve partitioning up the data and performing more gc() to clear up space
-##Using cpg.assoc:
+
+#Using cpg.assoc:
 data(samplecpg,samplepheno,package="CpGassoc")
 results<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 results

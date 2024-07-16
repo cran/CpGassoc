@@ -28,6 +28,29 @@ function(x,cpgname,chr,pos,save.plot=NULL,file.type="pdf",popup.pdf=FALSE,eps.si
     cpgtitle<-data.frame(cpglab=as.character(cpgname),chr,pos)
 
     info<-merge(test,cpgtitle,by.x="CPG.Labels",by.y="cpglab",sort=FALSE)
+    #--- --- --- --- --- --- --- --- ---
+    # Check for chromosome 0
+    #--- --- --- --- --- --- --- --- ---
+    a1<-sum(info$chr==0)
+    b1<-sum(as.character(info$chr)=="0")
+    if(a1>0 | b1>0){
+      warning("CpG sites registered at chromosome 0. These are dropped.\n")
+      drop_chr0<-which(info$chr==0| as.character(info$chr)=="0")
+      info<-info[-drop_chr0,]
+    }
+    #--- --- --- --- --- --- --- --- ---
+    # Check for 0 p-values
+    #--- --- --- --- --- --- --- --- ---
+    pvalues_0<-which(info$P.value==0)
+    
+    if(length(pvalues_0)>0){
+      warning("There are p-values listed as 0 (limit of R).\nThese are set to the next smallest divided by 2\n")
+      non_0_min<-min(info$P.value[-pvalues_0])
+      info$P.value[pvalues_0]<-non_0_min/2
+    }
+    
+    
+    
     score<-info$P.value
     fdr.score<-info$FDR
     direc<-sign(info$T.statistic)

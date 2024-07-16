@@ -1,8 +1,16 @@
 cpg.work <-
 function(beta.values,indep,covariates=NULL,data=NULL,logit.transform=FALSE,
-          chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,callarge=FALSE,fdr.method="BH",logitperm=FALSE,big.split=FALSE) {
+          chip.id=NULL,subset=NULL,random=FALSE,fdr.cutoff=.05,callarge=FALSE,fdr.method="BH",logitperm=FALSE,big.split=FALSE,
+         return.data=FALSE) {
 gc()
-if(class(covariates)=="formula") {
+  
+  
+  if(fdr.method=="qvalue") {
+    warnings("\nfdr.method=qvalue is no longer supported. Changed to BH.\n")
+    fdr.method="BH"
+  }
+  
+if(is(covariates,"formula")){
   variables<-gsub("[[:blank:]]","",strsplit(as.character(covariates)[2],"+",fixed=TRUE)[[1]])
   covariates<-data.frame(eval(parse(text=variables[1])))
   names(covariates)=variables[1]
@@ -53,10 +61,7 @@ if(is.character(beta.values[1,1])) {
 beta.col<-ncol(beta.values)
 fdr <- beta.col >= 100
 
-if(fdr.method=="qvalue" & !fdr) {
-    fdr.method="BH"
-    warning("\nCan not perform qvalue method with less than a 100 CpG sites\n")
-    }
+
 
 if(callarge & big.split) {fdr=FALSE}
 
@@ -299,36 +304,10 @@ else {
 
 
 
+FDR=p.adjust(test.stat[,2],fdr.method)
 
-if (fdr & fdr.method=="qvalue") {
-  FDR<-matrix(NA,beta.col)
-  if (!requireNamespace("qvalue", quietly = TRUE)) {
-       stop("qvalue needed for this to work. Please install it.",
-                      call. = FALSE)
-            }
-  holder<-which(!is.na(test.stat[,2]) | !is.nan(test.stat[,2]))
-  qv<-tryCatch(qvalue::qvalue(test.stat[holder,2]), error = function(e) NULL)
-  if(is.null(qv)) {
-    qv <- tryCatch(qvalue::qvalue(test.stat[holder,2], pi0.method = "bootstrap"), error = function(e) NULL)
-    if(is.null(qv)) {
-      fdr<-FALSE
-      warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg \n")
-      fdr.method="BH"
-      }}
+test.stat<-cbind(test.stat,FDR)
 
-  if(fdr) {
-    FDR[holder,1]<-qv$qvalue
-    test.stat<-cbind(test.stat,FDR)
-      }}
-
-if(!fdr | fdr.method!="qvalue") {
-        if(fdr.method=="qvalue"){
-                 test.stat<-cbind(test.stat,p.adjust(test.stat[,2],"BH"))
-              }
-        if(fdr.method!="qvalue"){
-                 test.stat<-cbind(test.stat,p.adjust(test.stat[,2],fdr.method))
-              }
-        }
 if(beta.col==1) {callarge<-FALSE}
 
 if(is.null(dimnames(beta.values))& !callarge & beta.col>1) {colnames(beta.values)<-paste("X",1:beta.col,sep="") }
@@ -357,7 +336,11 @@ test.stat<-data.frame(test.stat,gc.p.value=gc.p.val,stringsAsFactors=FALSE)
 Num.Cov<-ncol(data.frame(covariates))
 if(!is.null(chip.id) & !random) {Num.Cov<-Num.Cov+1}          
 INFO<-data.frame(Min.P.Observed=min(test.stat$P.value,na.rm = TRUE),Num.Cov,fdr.cutoff,FDR.method=fdr.method,Phenotype=nameholder[[3]],
-                  betainfo=nameholder[[1]],chipinfo=nameholder[[2]],random,logittran=logit.transform,stringsAsFactors=FALSE)
+                  betainfo=nameholder[[1]],
+                 chipinfo=nameholder[[2]],random,
+                 logittran=logit.transform,
+                 is.factor=levin,
+                 stringsAsFactors=FALSE)
 
 holm.sites<-subset(test.stat,test.stat[,4]==TRUE)
 FDR.sites<- subset(test.stat,FDR<=fdr.cutoff)
@@ -368,6 +351,12 @@ rm(test.stat,holm.sites,INFO,FDR.sites,f.design,r.design,Problems,beta.values,
             e.s,indep,theholder)
 gc()
 class(info.data)<-"cpg"
+if(!return.data){
+  info.data$indep<-NULL
+  info.data$covariates<-NULL
+  info.data$chip<-NULL
+}
+
 info.data
 
   }

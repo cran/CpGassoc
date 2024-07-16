@@ -44,7 +44,7 @@ inflation estimate. Objects from \code{"cpg.perm"} will also have information co
 }
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 
@@ -69,6 +69,3 @@ cpg.GC(results)
 ##If the genomic inflation factor is less than one there is no need for adjustment
 
 }
-
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

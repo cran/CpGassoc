@@ -33,7 +33,7 @@ A function created to do a bunch of much smaller tasks within \pkg{CpGassoc} bas
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 \note{
 \code{cpg.everything} is designed to perform a multitude of smaller tasks for \code{cpg.assoc} that do not warrant a full
@@ -54,10 +54,7 @@ to be used, and getting the names for the values returned.
 }
 \examples{
 #Has four methods:character,complex, numeric/matrix, and logical
-#They correspon to getting the indep variable name, warnings, getting the random function,
+#They correspond to getting the indep variable name, warnings, getting the random function,
 #and getting the names for the values returned. For the design of these functions see
 #the R code. 
 }
-
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

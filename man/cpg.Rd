@@ -48,7 +48,7 @@ If \code{FALSE} Holm-significant CpG sites will not be used to compute expected 
 Main title to be put on the graph. If \code{NULL} one based on the analysis will be used.
 }
   \item{eps.size}{
-Vector indicating the size of .eps file (if creating one). Correponds to the options horizontal and height in the
+Vector indicating the size of .eps file (if creating one). Corresponds to the options horizontal and height in the
 \code{postscript} function.
 }
   \item{gc.p.val}{
@@ -79,7 +79,7 @@ Methods and extra functions for class \code{"cpg"}.
 
 \author{
 Barfield, R.; Kilaru,V.; Conneely, K.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 \note{
 Plots with empirical confidence intervals based on permutation tests can be obtained from \code{cpg.perm}.
@@ -97,10 +97,6 @@ See \code{\link{plot.cpg.perm}} for more info.
 
 }
 \examples{
-##Using the results from the example given in cpg.assoc.
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE. 
-###The default option is true.
-##This will involve partitioning up the data and performing more gc() to clear up space
 ##QQ Plot:
 data(samplecpg,samplepheno,package="CpGassoc")
 test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
@@ -119,6 +115,3 @@ head(sort(test)$results)
 ##Summary
 summary(test)
 }
-
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

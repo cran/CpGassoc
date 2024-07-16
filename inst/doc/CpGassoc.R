@@ -1,7 +1,7 @@
 ### R code from vignette source 'CpGassoc.Rnw'
 
 ###################################################
-### code chunk number 1: CpGassoc.Rnw:117-136
+### code chunk number 1: CpGassoc.Rnw:118-137
 ###################################################
 #Sample output from CpGassoc 
 ###NOTE: If you are dealing with large data, do not specify large.data=FALSE. The default option is true
@@ -25,7 +25,7 @@ randtest<-cpg.assoc(samplecpg[1:10,],samplepheno$weight,chip.id=samplepheno$chip
 
 
 ###################################################
-### code chunk number 2: CpGassoc.Rnw:189-197
+### code chunk number 2: CpGassoc.Rnw:190-198
 ###################################################
 library(CpGassoc)
 data(samplecpg,samplepheno,package="CpGassoc")
@@ -38,7 +38,7 @@ overall
 
 
 ###################################################
-### code chunk number 3: CpGassoc.Rnw:281-298
+### code chunk number 3: CpGassoc.Rnw:282-299
 ###################################################
 ##Loading the data
 library(CpGassoc)
@@ -60,7 +60,7 @@ summary(Testperm)
 
 
 ###################################################
-### code chunk number 4: CpGassoc.Rnw:350-356
+### code chunk number 4: CpGassoc.Rnw:351-357
 ###################################################
 library(CpGassoc)
 data(samplecpg,samplepheno,package="CpGassoc")
@@ -71,20 +71,20 @@ cpg.GC(results)
 
 
 ###################################################
-### code chunk number 5: CpGassoc.Rnw:417-418
+### code chunk number 5: CpGassoc.Rnw:418-419
 ###################################################
 ##See the examples in the CpGassoc tutorial.
 
 
 ###################################################
-### code chunk number 6: CpGassoc.Rnw:510-512
+### code chunk number 6: CpGassoc.Rnw:511-513
 ###################################################
 ##See the examples listed in cpg.assoc for ways in which to use cpg.work.
 ##Just change the cpg.assoc to cpg.work.
 
 
 ###################################################
-### code chunk number 7: CpGassoc.Rnw:568-581
+### code chunk number 7: CpGassoc.Rnw:569-582
 ###################################################
 library(CpGassoc)
 data(samplecpg,samplepheno,package="CpGassoc")
@@ -169,12 +169,12 @@ library(CpGassoc)
 ##This will involve partitioning up the data and performing more gc() to clear up space
 test<-cpg.assoc(samplecpg,samplepheno$weight,large.data=FALSE)
 ##Using rank, will plot the top three sites in order of significance:
-scatterplot(test,c(1:3))
+scatterplot(test,cpg.rank=c(1:3),user.indep=samplepheno$weight)
 ##Using name, specify three sites:
-scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"))
+scatterplot(test,cpg.name=c("CpG1182","CpG1000","CpG42"),user.indep=samplepheno$weight)
 
 ##Plotting something that is categorical in nature:
 test2<-cpg.assoc(samplecpg,factor(samplepheno$Disease),large.data=FALSE)
-scatterplot(test2,c(2))
+scatterplot(test2,c(2),user.indep=as.factor(samplepheno$Disease))
 
 

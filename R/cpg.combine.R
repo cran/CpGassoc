@@ -1,7 +1,21 @@
 cpg.combine <-
-function(allvalues,fdr.method="BH",fdr.cutoff=.05)    {
+function(allvalues,fdr.method="BH",fdr.cutoff=.05,return.data=FALSE)    {
+
+  
+  if(fdr.method=="qvalue") {
+    warnings("\nfdr.method=qvalue is no longer supported. Changed to BH.\n")
+    fdr.method="BH"
+  }
+  
+
   if(length(allvalues)==1) {
+    if(!return.data){
+      allvalues[[1]]$indep<-NULL
+      allvalues[[1]]$covariates<-NULL
+      allvalues[[1]]$chip<-NULL
+    }
     return(allvalues[[1]])
+      
       }
   else {
   correctval<-list()
@@ -13,11 +27,8 @@ function(allvalues,fdr.method="BH",fdr.cutoff=.05)    {
   if(length(correctval)==1) {
     return(correctval)
     }
-  levin<-is.factor(correctval[[1]]$indep)
+  levin<-(correctval[[1]]$info$is.factor)
   
-
-
-
   tnamepval<-function(x) {x$results[,1:3]}
   betainf<-function(x) {x$info$betainfo}
   temp<-sapply(correctval,tnamepval,USE.NAMES = FALSE)
@@ -61,31 +72,12 @@ test.stat[,4]<-ifelse(holmadjust>.05,FALSE,TRUE)
 names(test.stat)[4]<-"Holm.sig"
 
 fdr<-TRUE
-FDR<-matrix(NA,nrow(test.stat))
-holder<-which(!is.na(test.stat[,3]) | !is.nan(test.stat[,3]))
-if(fdr.method=="qvalue")  {
-       if (!requireNamespace("qvalue", quietly = TRUE)) {
-            stop("qvalue needed for this to work. Please install it.",
-                      call. = FALSE)
-            }
-qv<-tryCatch(qvalue::qvalue(test.stat[holder,3]), error = function(e) NULL)
-if(is.null(qv)) {
-    qv <- tryCatch(qvalue::qvalue(test.stat[holder,3], pi0.method = "bootstrap"), error = function(e) NULL)
-    if(is.null(qv)) {
-      fdr<-FALSE
-      warning("qvalue package failed to process p-values.\nUsing Benjamini & Hochberg\n")
-      fdr.method="BH"
-      }}
 
-if(fdr) {
-      FDR[holder,1]<-qv$qvalue
-      test.stat<-cbind(test.stat,FDR)
-      }
-      }
-if(!fdr | fdr.method!="qvalue") {
+
+
    FDR<-p.adjust(test.stat[,3],fdr.method)
    test.stat<-cbind(test.stat,FDR)
-    }
+    
 names(test.stat)<-cpg.everything(fdr,perm=FALSE,levin)
 test.stat<-data.frame(test.stat,gc.p.value=gc.p.val,stringsAsFactors=FALSE)
 fdr.sites<-test.stat[which(test.stat$FDR<fdr.cutoff),]
@@ -96,12 +88,20 @@ INFO<-data.frame(Min.P.Observed=min(test.stat$P.value,na.rm = TRUE),Num.Cov=corr
               , stringsAsFactors=FALSE)
 info.data<-list(results=test.stat,Holm.sig=holm.sites,FDR.sig=fdr.sites,
                   info=INFO,indep=correctval[[1]]$indep,covariates=correctval[[1]]$covariates,
-                  chip=correctval[[1]]$chip,coefficients=nonfactorinfo)
+                  chip=correctval[[1]]$chip,
+                coefficients=nonfactorinfo,
+                is.factor=levin)
 
 
 rm(allvalues,test.stat,correctval)
 gc()
 class(info.data)<-"cpg"
+if(!return.data){
+  info.data$indep<-NULL
+  info.data$covariates<-NULL
+  info.data$chip<-NULL
+}
+
 info.data
       }
 

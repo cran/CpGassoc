@@ -8,21 +8,10 @@ function(x) {
               holm.ind[which(is.na(x$results[,3]))]<-FALSE
                   }
             fdr.method<-x$info$FDR.method
-            if (fdr.method=="qvalue") {
-                 if (!requireNamespace("qvalue", quietly = TRUE)) {
-            stop("qvalue needed for this to work. Please install it.",
-                      call. = FALSE)
-                      }                   
-                fdr.adj<-tryCatch(qvalue::qvalue(x$results$gc.p.value), error = function(e) NULL)
-             if(is.null(fdr.adj)) {
-                fdr.adj <- tryCatch(qvalue::qvalue(x$results$gc.p.value, pi0.method = "bootstrap"), 
-                                      error = function(e) NULL)
-                if(is.null(fdr.adj)) {
-                  fdr.method="BH"
-                }}}
-            if(fdr.method!="qvalue") {
-              fdr.adj<-p.adjust(x$results$gc.p.value,fdr.method)
-              }
+            
+            
+            fdr.adj<-p.adjust(x$results$gc.p.value,fdr.method)
+            
             num.fdr<-sum(fdr.adj<.05,na.rm=TRUE)
             beta.col<-nrow(x$results)
             levin<-is.factor(x$indep)

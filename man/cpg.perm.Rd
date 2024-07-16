@@ -11,7 +11,7 @@ In addition to the same test statistics computed by \code{cpg.assoc}, \code{cpg.
 \usage{
 cpg.perm(beta.values, indep, covariates = NULL, nperm, data = NULL, seed = NULL,
 logit.transform = FALSE, chip.id = NULL, subset = NULL, random = FALSE,
-fdr.cutoff = 0.05, fdr.method = "BH",large.data=TRUE)
+fdr.cutoff = 0.05, fdr.method = "BH",large.data=FALSE,return.data=FALSE)
 }
 
 \arguments{
@@ -51,11 +51,13 @@ logical. If \code{TRUE}, the \option{chip.id} will be processed as a random effe
 The threshold at which to compare the FDR values. The default setting is .05. Any FDR values less than .05 will be considered significant.
 }
   \item{fdr.method}{
-Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \code{\link{p.adjust}} or "qvalue" 
-for John Storey's qvalue method (required to have \pkg{qvalue} package installed). The default method is "BH" for the Benjamini & Hochberg method.
+Character. Method used to calculate False Discovery Rate. Can be any of the methods listed in \code{\link{p.adjust}}. The default method is "BH" for the Benjamini & Hochberg method.
 }
   \item{large.data}{
-Logical.  Enables analyses of large datasets.  When \code{large.data=TRUE}, \code{cpg.assoc} avoids memory problems by performing the analysis in chunks. 
+Logical.  Enables analyses of large datasets.  When \code{large.data=TRUE}, \code{cpg.assoc} avoids memory problems by performing the analysis in chunks. Note: this option no longer works within windows systems. Based on reading max memory allowable by the system. Defaults to False. 
+}
+  \item{return.data}{
+Logical. cpg.assoc can return dataframes containing the the variable of interest, covariates, and the chip id (if present). Defaults to FALSE. Set to TRUE if plan on using the downstream scatterplot functions).
 }
 }
 
@@ -72,7 +74,7 @@ Similar to the permutation.matrix only in relation to the genomic control adjust
 A data frame consisting of the permutation P-values, and the number of permutations performed.
   }
 \item{perm.tstat}{
-If one hundred or more permutations were performed and indep is a continuous variable, consists of the quantile .025 and .975 of observed t-statistcs for each permutation, ordered from smallest to largest.
+If one hundred or more permutations were performed and indep is a continuous variable, consists of the quantile .025 and .975 of observed t-statistics for each permutation, ordered from smallest to largest.
 perm.tstat is used by \code{plot.cpg.perm} to compute the confidence intervals for the QQ plot of t-statistics. Otherwise \code{NULL}.
 }
 \item{perm.pval}{
@@ -83,7 +85,7 @@ the confidence intervals for the QQ plot of the p-values. Otherwise NULL.
 
 \author{
 Barfield, R.; Conneely, K.; Kilaru,V.\cr
-Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
+Maintainer: R. Barfield: <barfieldrichard8@gmail.com>
 }
 
 
@@ -102,9 +104,7 @@ Maintainer: R. Barfield: <rbarfield01@fas.harvard.edu>
 \examples{
 ##Loading the data
 data(samplecpg,samplepheno,package="CpGassoc")
-###NOTE: If you are dealing with large data, do not specify large.data=FALSE.
-###The default option is true.
-##This will involve partitioning up the data and performing more gc() to clear up space
+
 #Performing a permutation 10 times
 Testperm<-cpg.perm(samplecpg[1:200,],samplepheno$weight,seed=2314,nperm=10,large.data=FALSE)
 Testperm
